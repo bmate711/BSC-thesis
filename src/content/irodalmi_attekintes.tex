@@ -1,0 +1,83 @@
+\chapter{Irodalmi áttekintés nov 19}
+
+\section{Robotok kinematikai modellezése}
+\subsection{Feladat tér}
+A robotikában a feladat tér egy pontját egy M  4x4-es homogén transzformációs mátrixszal adjuk meg. Ez a mátrix a robotkar rögzítési pontjához kötött koordináta rendszer és a robotkar végpontjához kötött koordináta rendszer között add meg egy transzformációt.
+$$ M = 
+\begin{bmatrix}
+  R_{3x3} & T_{3x1}\\
+  0_{1x3} & 1
+\end{bmatrix}$$
+Az M mátrix egy 3x1-es T részmátrixa írja le a rögzítési ponthoz kötött Descartes koordináta rendszerben, hogy hol található a végpont koordinátarendszere. Azt, hogy a végponthoz viszonyított koordinátarendszer, hogy helyezkedik el a rögzítési ponthoz képest, azaz a két koordinátarendszer megfelelő tengelyei milyen szöget zárnak be egymással,egy 3x3-as R részmátrix írja le. Ezzel az R részmátrixal lényegében a robotkar végének állását írjuk le. 
+
+[Robotic Task Sequencing Problem: A Survey]
+\subsection{Robotkonfigurációs tér}
+
+A robotkar állását, konfigurációját megadhatjuk a robotkar egyes csuklóinak állásával. Ekkor C legyen az egyes csuklók állásának szögértéke. Egy 3 szabadságfokú robotkar esetén C három darab értéket fog tartalmazni.
+
+A robotkarkonfigurációs teret szokás még csukló térnek vagy robot térnek nevezni.
+
+[KÉP]
+
+[Robotic Task Sequencing Problem: A Survey]
+\subsection{Denavit–Hartenberg paraméter}
+
+A robotkar geometriai reprezentációját többféleképpen is megtudjuk adni.
+Az egyik kényelmes módja, hogy minden egyes kartaghoz egy koordinátarendszert rögzítünk. 
+Jacques Denavit és Richard Hartenberg írta le először egy konvencionális jelölésrendszert, hogy általánosítsa a kartagokhoz rendelt koordinátarendszerek leírását.A jelölésrendszer elemeit az 1955-ös publikációjuk alapján Danavit-Hartenberg paramétereknek (D-H paramétereknek) nevezzük őket.
+
+Ebben a jelölésrendszerben négy paraméterre van szükségünk, hogy a egy koordinátarendszert leírjunk egy másik koordináta rendszerhez viszonyítva. A négy paraméterből kettő vonatkozik a csuklókra és kettő a kartagok leírására. A csuklóknál a hozzájuk kapcsolódó kartagok eltolása d és a csuklóállás szöge $\Theta$ . A kartagoknál a kartag hossza a és a kartag elcsavarodása $\alpha$ .
+
+A jelölésrendszebren az i-edik csukló az i-edik kartag végén helyezkedik el, az i-edik és i+1-edik  kartag között. A csukló eltolás d$_i$ és a csuklószög $\Theta_i$ az i-1.csukló szerint van mérve, ezért a csukló indexe és a csukló paramétereinek indexe nem egyezik meg.
+
+[KÉP]
+
+
+
+[Hivatkozás: Springer Handbook of Robotics 2.6
+WIkipedia: $https://en.wikipedia.org/wiki/Denavit-Hartenberg_parameters$]
+
+
+\subsection{Forward kinematika}
+
+A forward kinematika feladata nyílt kinematikai láncú robotkar esetén, hogy a kar csuklóállásainak értékéből, egy viszonyítási ponthoz tekintve, meghatározza a robotkar végpontjának helyzetét. A viszonyítási pont általában a robotkar rögzítési pontja, ami egy konstans eltolással megkapható a 0. kartagból. Általában a robotkar végére valamilyen eszközt szerelünk, hogy befolyásolni, vagy érzékelni tudja a környezetét. A robotkar végpontjának, tool frame-jének, a felszerelt eszköz végpontját szokás hívni. A tool frame megkapható egy konstans transzformációval a robot utolsó kartagjához képest.
+
+A számításhoz bemeneti paraméterként két dologra van szükség, egyik a robotkar fizikai paraméterei, a másik a robotkar csuklóállásainak értéke.
+
+A forward kinematikai probléma megoldása egy transzformáció egy a robotkar rögzítési pontjához kötött koordináta rendszerből a tool-framehez kötött koordináta rendszerbe, azaz a felszerelt eszköz és a rögzítési pont között. Ezt a transzformációt egy  4x4-es homogén transzformációs mátrixszal szokás leírni. A transzformáció egyértelmű, mert egy robotkarkonfigurációhoz egy homogén transzformációs mátrixot rendel. 
+
+[Hivatkozás: Springer Handbook of Robotics 2.6]
+
+\subsection{Inverz kinematika}
+\section{Sorrendtervezés}
+\subsection{GTSP}
+\subsection{LNS}
+\subsection{Megoldó algoritmusok}
+\subsubsection{Lokális keresés}
+
+Az informatikában a lokális keresés egy heurisztikus módszer nagy számításigényű optimalizációs feladatok megoldására. A lokális keresés segítségével megtalálhatjuk a legjobb megoldást egy probléma megoldásainak halmazából. Egy lokális kereső algoritmus a megoldási térben, megoldásról megoldásra halad, lokális változásokat végrehajtva. Az algoritmusok addig futnak, amíg el nem érnek egy olyan megoldáshoz, amin már nem tudnak tovább javítani vagy amíg a keresés ideje le nem telik.
+
+Lokális keresést nagyon sok féle nagy számítási igényű feladaton alkalmaznak, beleértve az utazó ügynök problémát is.
+Optimalizációs problémák megoldása során a lokális keresés egy célfüggvény segítségével keresi meg a megoldások közül a legjobbat. Ha az állapotteret és a célfüggvényt egy diagramon ábrázoljuk, akkor a feladat állapottérfelszínét kapjuk. Egy teljes lokális keresés mindig talál megoldást, ha az létezik. Az optimális lokális keresési algoritmusok mindig megtalálják a keresett globális minimumot vagy maximumot.
+
+
+\subsubsection{Hegymászó keresés}
+
+A hegymászó keresés egy egyszerű mohó algoritmus, ami mindig az aktuális legjobb érték felé lép. Ha az algoritmus a következő lépésben már nem tud javítani, akkor a keresés megáll. A hegymászó keresés nem optimális lokális keresés. Mivel a keresés nem járja be a teljes állapotteret, csak amíg az eredményen javítani tud, a keresés könnyen lokális optimumban ragadhat.
+
+\subsubsection{Szimulált lehűtés}
+
+
+A szimulált lehűtés a hegymászó algoritmus továbbfejlesztett változata. A hegymászó algoritmussal a legnagyobb probléma, hogy könnyen egy lokális optimumba juthatunk és befejeződik a keresés. Ez abból adódik, hogy a keresés során az állapottérnek csak minimális részét járjuk be. A szimulált lehűtés ezt próbálja meg kiküszöbölni. A hegymászó algoritmus mindig a legjobb lépést választja, ehelyett a szimulált lehűtés egy véletlen lépést választ. Ha a lépés javítja a célfüggvény értékét, akkor mindig végrehajtásra kerül. Ellenkező esetben az algoritmus a lépést csak P eséllyel teszi meg. A P valamilyen 1-nél kisebb szám, értéke exponenciálisan csökken a lépés értékének rosszaságával, azaz egy delta E mennyiséggel, amivel a célfüggvény értéke romlott. A valószínűség a szimulált lehűtés másik T paraméterétől is függ. A T hőmérséklet csökkentésével is csökken a rossz lépés valószínűsége. A rossz lépések esélye a szimulált lehűtés indulásánál, amikor a T nagy, elég magas, a T csökkenésével viszont egyre valószínűtlenebbekké válnak. Ha a T értékét kellően lassan csökkentjük akkor matematikailag bebizonyítható, hogy a szimulált lehűtés közel egy valószínűséggel megtalálja a keresett globális optimumot.
+
+Az algoritmus a 80-as évek elején terjedt el. A szimulált lehűtést először a VLSI nyomtatott áramkörök tervezésekor használták. Azóta széleskörben alkalmazzák a nagy számításigényű optimalizációs feladatokra.
+
+\subsubsection{Tabu keresés}
+
+
+
+A tabu keresés lényegében egy rövidtávú memóriával rendelkező hegymászó keresés, pár szabállyal kiegészítve. A tabu keresés során addig folytatjuk a keresést amíg ki nem elégítjük a keresés feltételét, ez lehet egy célfüggvényérték vagy a futási idő korlátozása. A tabu keresési algoritmus, ha lehet mindig olyan lépést választ, amivel javít a célfüggvény értékén. Ha nincs ilyen lehetőség akkor rontó lépést is elfogad. Az algoritmus egy véges nagyságú FIFO memóriában tárolja el a már meglátogatott csomópontokat. Ha egy csomópont benne van a memóriájában akkor oda nem lép az algoritmus. Az algoritmus képes arra, hogy kitörjön lokális optimumból. Ennek hatékonysága a FIFO méretétől függ, addig elkerüli az algoritmus a lokális optimumot amíg a csomópont a memóriában van.
+
+A tabu keresés algoritmust a 1989 években írta le Fred W. Glover. A keresési eljárást azóta széleskörben alkalmazták a logisztika, orvosbiológiai elemzés, ütemezés és egyéb nagy számítási teljesítményű optimalizációs feladatnál.
+
+\section{Pályatervezés}
