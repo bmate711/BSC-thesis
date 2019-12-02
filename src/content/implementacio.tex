@@ -1,2 +1,476 @@
-\chapter{Implementáció nov 22}
-ijm
+\chapter{Implementáció HIV}
+Az alábbi fejezetben szeretném bemutatni az általam elkészített, használt könyvtárakat és az elkészült program szerkezetét. 
+
+A felhasznált könyvtárak egy részét a SZTAKI bocsájtotta rendelkezésemre másik része pedig nyílt forráskódú és licence alapján szabadon felhasználható. 
+
+A fejlesztést C\#-ban hajtottam végre, és Visual Studio 2019-es IDE használtam hozzá. Ezen kívül használtam még a RoboDK-t api-t a teszt feladatok generálásához. Ezt Python nyelven tettem meg és a Visual Studio Code nevű szövegszerkesztőtben készítettem el. Az egyes robotkarállások térbeli ellenőrzésére a RoboDK-t és a CellVisualizer-t, ami a SZTAKI-tól kapott CollisionLibrary része, használtam fel.
+
+A program bemeneti paraméterei a robot és cella modellt leíró STL fájlok és a elvégzendő pakolási feladat leírását tartalmazó fájl. A feladatot egy txt-ből olvassa be a program. A txt fájl minden sora egy összefüggő adatot tartalmaz, az adat egyes részeit tabulátor választja el. A txt fájl felépítése a következő:
+
+\begin{itemize}
+\item A robotkar kezdő robotkonfigurációjának szögei radiánban.
+\item A robotkar cél robotkonfigurációjának szögei radiánban. 
+\item A munkadarabok felvételi és lerakási pontja. Egy munkadarabhoz két sor tartozik, az első sor a munkadarab felvételi pontjának homogén transzformációs mátrixa, a második sor pedig a munkadarab lerakási pontjának homogén transzformációs mátrixa. 
+
+\end{itemize}  
+
+A szakdogalzat feladatom elkészítése során először továbbfejlesztettem az önálló laboratóriumi munkámat, majd a különálló könyvtárakat egymásba fűztem, hogy megoldják a pakolási feladatot. Az IntegrateServices osztály végzi el a három különálló könyvtár egymásba fűzését. Ezek a könyvtárak a CollisionLibrary, InverseMap, SequencePlanning. A könyvtárak függőségi diagramja a következő:
+
+Először az általam felhasznált könyvtárakat szeretném röviden bemutatni, amikre az én munkám építkezik és ezek után az általam létrehozott könyvtárat illetve osztályt.
+
+\section{CollisionLibrary}
+[Önlab / TDK hivatkozás]
+
+A CollisionLibrary egy C\#-ban íródott keretrendszer nyílt kinematikai láncú robotkarok ütközésvizsgálatára és pályatevezésére. Ezt a könyvtár a SZTAKI-ban található meg és az ő engedélyükkel használtam. 
+
+\subsection{CollisionManager}
+A CollisionManager osztály segítségével lehet ütközésvizsgálat során vizsgált objektumokat, az az a robotkar és cella modellje, kezelni és ütközésvizsgálatot végrehajtani.
+
+Szakdolgozatom során a pályatervezésnél és az inverz kinematika kimenetének szűrésénél használom fel.
+
+Először bemutatom az osztály használatához szükséges osztályokat és fontosabb függvényeiket. Majd a CollisionManager-t és egy példát az inicializációjára. 
+
+\subsubsection*{RobotGripper}
+
+A robotkarra szerelhető végberendezések egyik fajtája a megfogó. Ez az osztály implementálja a megfogó modelljét.
+
+\paragraph{public RobotGripper():}
+
+ Az osztály konstruktora paraméter nélkül hívható, inicializálja a megfogót.
+
+\subsubsection*{UR5}
+
+Az UR5 osztály implementálja az UR5-ös robotkar modelljét. Segítségével lehet a robotkar paramétereit beállítani. 
+
+\paragraph{public UR5(GripperModel gripper, double[ ] translation, double[ ] rotation):} 
+
+A konstruktor első paramétere a robotkarra szerelt végberendezés, második paraméterrel a robotkar eltolását tudjuk megadni a munkatér origójához képest, harmadik paraméterrel az egész robotkart tudjuk elforgatni a modell egyes koordináta tengelyi körül.
+
+\subsubsection*{PQPCollisionLib}
+
+Az útkőestérvezés matematikai modelljét megvalósító osztály. Segítségével lehet két osztály ütközését és távolságát vizsgálni.
+
+\paragraph{public PQPCollisionLib():} Az osztály paraméter nélküli konstruktora.
+
+\subsubsection*{Mesh}
+A Mesh osztály egy geometriai test térhálóját tárolja és kezeli.
+
+\paragraph{pulic Mesh(string stlFile):} 
+
+A Mesh osztály konstruktorának az STL fájl elérési útját kell megadni. A konstruktor betölti a fájlt és inicializálja objektumot.
+ 
+\subsubsection*{CollObj}
+
+A CollObj osztályban tárolódnak el a robot modell és cella egyes különálló részei. Például a robotkar egyes kartagjai egy egy CollObj-ek.   
+
+\paragraph{public CollObj(Mesh mesh):}
+
+A konstruktor paraméterként egy Mesh-t vár és inicializálja az objektumot.  
+
+\subsubsection*{CollisionRule}
+
+Az osztály segítségével két CollObj között lehet felvenni ütközési szabályt.
+
+\paragraph{public CollisionRule(CollObj a, CollObj b, bool collCheckActive):} 
+
+A konstruktor első két paraméterrként egy egy CollObj-et, harmadik paraméter a szabály, ha a bool értéke true, akkor vizsgálja köztük az ütközést, ha false akkor nem. 
+
+\subsubsection*{Config}
+
+Az osztály segítségével a robotkar egy konfigurációját kezelhetjük.
+
+\paragraph{public Config(double[] joints):} 
+
+Az osztály konstruktora a robotkar csuklóállásainak segítségével inicializálja az objektumot.
+
+\subsubsection*{Az osztály általam használt függvényei}
+
+\paragraph{public CollisionManager(ICollisionLibrary library, RobotModel robotModel): }
+
+Az osztály konstruktora két paramétert vár, az első az ütközésvizsgálatra használt osztály egy példánya, a második a robot modellje.
+
+\paragraph{public CollObj getCollisionObject(string name): } 
+
+A CollisionManager által kezelt CollObjecteket lehet elérni név alapján.
+
+\paragraph{public void addCollisionRule(CollisionRule newCollisionRule):}
+
+Segítségével lehet új ütközési szabályokat felvenni az osztályhoz.
+ 
+\paragraph{public bool checkConfigurationBool(Config configuration):}
+
+A függvény segítségével lehet vizsgálni, hogy egy robotkarállás ütközik-e.
+\linebreak
+
+\subsubsection*{A CollisionManager beállítása}
+
+
+
+\subsection{PRM}
+
+A PRM osztály a CollisonLibrary része. Az irodalmi áttekintésben bemutatott PRM pályatervezési algoritmus megvalósítása. A PRM során egy keresési térképet építünk fel, amit ezt követően több is fel tudunk használni a pályatervezéshez. Az osztály segítségével létrehozhatunk, lementhetünk, betölthetünk ilyen térképeket és ütközésmentes pályatervezést valósíthatunk meg.
+
+
+\subsubsection*{PRMParameters}
+
+Az osztály segítségével a PRM keresés paramétereit lehet beállítani és kezelni.
+
+Az osztály fontosabb propertijei:
+
+\paragraph{NumberOfNodes int: } 
+
+A PRM gráf csúcsainak számát adja meg.
+
+\paragraph{NumberOfNeighbours int:}
+
+Megadja, hogy a PRM gráf csúcsát hány darab hozzá legközelebbi csúccsal kössünk össze.
+
+\paragraph{TCP double:} 
+
+A robotkarra szerelt megfogó két pofája közti távolság milliméterben megadva.
+
+\paragraph{MinimumDegrees double[ ]:} 
+
+A robotkar csuklóinak minimális csuklószögei.
+
+\paragraph{MaximumDegrees double[ ]:} 
+
+A robotkar csuklóinak maximális csuklószögei. 
+
+\subsubsection*{A PRM osztály általam használt függvényei}
+
+\paragraph{public void Build():}
+
+Felépít egy új pályatérképet a PRMParameters értékei alapján.
+
+\paragraph{public void Save(string fileName):}
+
+Elmenti a pályatérképet a fileName nevű fájlba.
+
+\paragraph{public void Load(fileName):}
+
+Betölti a pályatérképet a fileName nevű fájlból.
+
+\paragraph{public List< Config > Execute(Config from, Config to ): }
+
+A függvény tervez egy ütközésmentes pályát a from robotkonfigurációból a to robotkonfigurációba, visszatérési értéke a pályatérkép bejárt csúcsainak robotkonfigurációit bejárási sorrendben tartalmazó lista.
+
+
+
+
+\subsection{PathReview}
+
+A PathReview könyvtárban különböző pályasimítási eljárások találhatóak. A PRM keresés csak a térképben felépített gráf csúcsaiban keresi meg a legrövidebb utat. Így ez a talált út még nem optimális. A simítási eljárásokkal ezt az utat tudjuk lerövidíteni és hatékonyabbá tenni.
+
+\subsubsection*{Pályasimítási eljárások osztályai}
+
+A pályasimítási eljárásokat egy egy osztály implementálja. Ezek az osztályok egy közös IPathReview interface-t valósítank meg, ezáltal egységesen használhatóak. Az osztályoknak ugyan úgy használható a konstruktora és az execute függvénye.
+
+\paragraph{public PathReview(ICollisionManager collisionManager, List<Config> path)}
+
+A simítóeljárásokat implementáló osztályoknak konstruktorban egy ICollisionManager interface-t implementáló osztály példányát és egy utat kell megadni. 
+
+\paragraph{ List< Config > Execute()}
+
+A függvény a konstruktorban megadott pályát módosítja az osztályban implementált eljárás szerint. Viszatérési értéke a pálya robotkonfigurációit  bejárási sorrendben tartalmazó lista.
+
+\section{InverseMap könyvtár}
+
+Az InverseMap könyvtár az irodalmi áttekintésben bemutatott inverz kinematikai folyamatra épül. Elérhető benne néhány robot zárt alakjának megoldása, köztük az általam tesztelésre használt UR5-ös roboté is. A könyvtárat a SZTAKI bocsájtotta rendelkezésemre.
+
+\subsection{InverseMap osztály}
+
+Az InvereMap egy absztrakt osztály, a különböző robotok inverz kinematikai modelljét implementáló osztályok ősosztálya. Segítségével közös interface-en keresztül használhatóak az egyes inverz kinematikai osztályok.
+Fontosabb függvényei:
+\paragraph{public void SetInputVariable(string key, double val):}
+
+Ennek a függvénynek a segítségével lehet beállítani inverz megoldó paramétereit, például: Robotkar D-H paramétereit, a feladattérbeli pont paramétereit, stb. .
+
+\paragraph{public List< List< double > > GetOutputVariablesList(string[ ] keys, int[ ] branches):}
+
+A függvény segítségével lehet lekérni az a barnches int tömbben megadott megoldáságak keys tömbben felsorolt paraméterit.
+  
+\subsection{UR5}
+
+Az UR5-ös robotkar inverz kinematikáját megvalósító osztály.
+
+\paragraph{public UR5():} 
+
+Az osztály paraméter nélküli konstruktora.
+
+\paragraph{public void Calculate():}
+
+Az inverz kinematikai számítást elvégző függvény.
+  
+\section{Google OR-tools}
+
+A Google OR-Tools egy nyílt forráskódú keretrendszer optimalizációs problémák megoldására.
+
+
+
+A kertrendszer C++-ban készült a minél hatékonyabb futás érdekében, de elérhető még másik három népszerű programozási nyelven, ezek a Python, C\# és Java. A keretrendszer egyegységes interfészt add, amelynek segítségével le tudjuk írni a matematikai problémánkat. 
+
+A keretrendszer hatékony megoldást kínál több matematikai problémára. Ezek közt található a VRP azaz Vehicle Routing Problem. A VRP általánosan megfogalmazható úgy, hogy mi az optimális útja egy flotta járműnek, hogy kiszállítsa a vevőknek a csomagokat. Ennek egy speciális változata, amikor csak egy  "járművel" rendelkezünk a TSP.
+
+Ahhoz hogy a megoldó megoldja a problémánkat egy adatmodellt kell építenünk, VRP és TSP esetében ez egy négyzetes mátrix. A négyzetes mátrixban kell leírnunk a GTSP gráf egyes csúcsai közötti élsúlyoknak  értékét.
+
+A továbbiakban bemutatom az OR-tools általam használt osztályait és azok fontosabb függvényit.
+
+\subsection{RoutingIndexManager}
+
+A RoutingIndexManager osztály feladata számon tartani a keresés indexelését, a csomópontok és a járművek maximális számát és az egyes járművek kezdő és véghelyének indexét.
+
+\paragraph{public RoutingIndexManager(int num\_nodes, int num\_vehicles, int[] starts, int[] ends):} 
+
+Az osztály konstruktorának meg kell adni a keresési gráf csomópontjainak számát, a feladat járműveinek számát, a mi esetünkben 1, a járművek kiinduló és cél helyének indexét a négyzetes mátrixban.
+
+\paragraph{public int IndexToNode(long index):}
+
+A keresés indexét váltja át a négyzetes mátrix tagjának indexévé.
+
+\subsection{RoutingModel}
+
+A RoutingModel feladata a GTSP probléma megoldása. 
+
+\paragraph{public RoutingModel(RoutingIndexManager manager):}
+
+Az osztály konstruktorának egy RoutingIndexManager példányt kell megadnunk.
+
+
+
+\paragraph{AddDisjunction(int [] indexes):}
+
+A függvény segítségével tudjuk beállítani a GTSP csoportjait, az indexes tartalmazza a csoport négyzetes mátrixban lévő helyét.
+
+\paragraph{public int RegisterTransitCallback(LongLongToLong callback):}
+
+A függvény segítségével tudjuk beregisztrálni a callback eseményünket. A callback esemény pedig a négyzetes mátrix egy sor és oszlop indexéhez tartozó súlyértéket ad vissza. Például:
+
+\paragraph{SetArcCostEvaluatorOfAllVehicles(int transitCallbackIndex):} 
+
+Az összes járműnek beállítja a költségszámító callback függvényét.
+
+\paragraph{public IntVar NextVar(long index):}
+Visszatér a következő csúcs indexével.
+
+\paragraph{public bool IsEnd(long index):}
+
+Igazzal tér vissza ha az index az út utolsó eleme.
+
+\subsection{Assignment}
+
+Ez az osztály felelős a sorrendtervezés eredményének kezeléséért.
+
+\paragraph{public long Value(IntVar var):}
+
+A megoldás egy var-al indexelt elemét adja vissza.
+
+\section{SequencePlanning}
+
+A SequencePlaning könyvtár felelős a sorrendtervezési feladat megoldásáért. 
+A könyvtárat a Google OR-Tools felhasználásával hoztam létre.
+
+Az OR-Tools mellett még a GLKH  \cite{Helsgaun:2015} megoldó jött fel lehetőségként. A GLKH a GTSP problémák megoldására kifejlesztett környezet. Előnye, hogy a egy GTSP problémát nagyon gyorsan oldhat meg és közel optimális megoldást adhat. Hátránya hogy, a GTSP problémán kívül nehéz bővíteni a modellt, plusz korlátokat nem tudnánk felvenni. Az OR-Tools egy általánosabb keretrendszer, könnyen felépíthető benne a GTSP modell és bővíthető új korlátokkal, mint a precedencia korlát. Hátránya viszont, hogy nem a GTSP problémára kifejlesztett keretrendszer, ezért lassabban találhat megoldást. A bővíthetőség miatt az OR-Toolst választottam.
+
+A könyvtár első változatát az önállólaboratóriumi munkám során készítettem el. A könyvtár akkori változata C++-ban íródott, a szakdolgozati munkámat pedig C\# szerettem volna megírni, részben azért mert a számomra szükséges könyvtárak C\#-ban voltak elérhetők, részben meg azért mert a SZTAKI kutatócsoportja, akiknél a szakdolgozatomat készítettem C\#-ot használ így számukra is előnyös, hogy egységes marad a kódbázisuk. Ahhoz hogy az önálló laboratóriumi munkámat fel tudjam használni a szakdolgozat során meg kellett oldani az eltérő programozási nyelvből adódó problémát. A probléma megoldására két lehetőséget láttam.
+
+Az első lehetőség, hogy egy becsomagoló C\# osztályt készítek az önálló laboratóriumi munkámhoz, és majd azon keresztül érem el. A neten elérhető számos szabadon elérhető program, ami képes legenerálni ezt a becsomagoló osztályt. 
+Az önálló laboratóriumi munkám egyik hiányossága az, hogy bár a programot a letöltött Google OR-Tools környezetben lehet fordítani parancssorból és hatékonyan elvégzi a sorrendtervezést, önállóan nem fordul, nem lehet külső könyvtárként használni. Így becsomagolás előtt még ezt a problémát is meg kell oldani. 
+Ezen felül a C++ kódot ki kell egészíteni egy interfésszel, amin keresztül elérhető a sorrendtervező külső alkalmazásokból és a kódot refaktorálni kell, és megváltoztatni pár helyen a kódot, hogy általánosabban is felhasználható legyen a sorrendtervezés. 
+
+Ennek a lehetőségnek előnye, hogy az önálló laboratóriumi munkám jó alapot ad, nem sok idő elvégezni a kódon a változtatásokat. Hátránya pedig, hogy nem lesz egységes a kódbázis és időbe telik megoldani a kód könyvtárként kezelését és becsomagolását.
+
+A másik lehetőség, hogy újraírom C\#-ban az önálló laboratóriumi munkámat, így könnyen tudom integrálni a szakdolgozatomi munkámba. A C\# Nuget csomagkezelő rendszerében megtalálható a Google OR-tools és a hozzá szükséges könyvtárak. Ennek köszönhetően a csomag feltelepítése után már nem kell azzal foglalkoznom, hogy hogyan fogom az általam írt könyvtárat kívülről elérni. Ebben a lehetőségben a feladatom újra implementálni az önnálló laboratóriumi munkámat. 
+
+Ennek a hátránya, hogy az újra implementálás időbe telik. Előnye pedig, hogy egységes lesz a kódbázis, tisztább lesz az újraírt kód.
+
+Én a második lehetőséget választottam, úgy ítéltem meg, hogy minőségibb a munkám, ha egységes és átlátható a kódbázis. A másik indok amiért így döntöttem, hogy átláttam a munka mennyiségét és ezáltal könnyebben beosztottam az időmet. 
+
+A SequencePlaning könyvtár végzi a robotos pakolási feladatok sorrendtervezését. A megvalósítás során három osztályt implementáltam:
+
+\begin{itemize}
+\item Workpiece 
+\item DistanceMatrix 
+\item Solver
+\end{itemize}
+
+[osztálydiagram]
+
+\subsection{Workpiece}
+
+A Workpiece osztály egy munkadarab felvételi és lerakásipontjának helyét tárolja el robotkonfigurációkban. 
+
+\subsubsection{Az osztály propertijei}
+
+\paragraph{GraspConfigs List< List <double> > } 
+A munkadarab felvételi robotkonfigurációinak gettere és settere.
+
+\paragraph{PutawayConfig List< List <double> >}
+
+A munkadarab lerakási robotkonfigurációinka settere és gettere.
+
+\subsubsection{Az osztály függvényei}
+\paragraph{public Workpiece( List< List <double> > graspConfigs, List< List <double> > putawayConfigs):}
+Az osztály konstruktora, beállítja a felvételi és lerakási robotkonfigurációkat.
+\paragraph{public Workpiece():}
+Az osztály paraméter nélküli konstruktora.
+\paragraph{public void AddGraspConfig(List <double>):}
+A felvételi robotkonfigurációkhoz hozzáad egy elemet.
+\paragraph{public void AddGraspConfigs(List< List <double> >):}
+A felvételi robotkonfigurációkhoz hozzáad egy robotkonfigurációkat tartalmazó listát.
+\paragraph{public void AddPutawayConfig(List <double>):}
+A lerakási robotkonfigurációhoz hozzáad egy elemet.
+\paragraph{public void AddPutawayConfigs(List< List <double> >):}
+A lerakási robotkonfigurációhoz hozzáad egy robotkonfigurációkat tartalmazó listát.
+
+
+\subsection{DistanceMatrix}
+
+A matematikai GTSP modellt a DistanceMatrix osztály implementálja. Feladata megállapítnai az egyes élsúlyokat, megadni az egyes csoportokat, felépíteni a keresés során használt négyzetes mátrixot.
+A DistanceMatrix konstruktorában egy Workpiece listát és a robotkar kiinduló és célkonfigurációját kapja meg, ezek alapján hozza létre a négyzetes mátrixot. A DistanceMatrix példányból propertiken keresztül érhetők el az egyes paraméterek, ezek:
+
+\begin{itemize}
+\item Starts int[ ] - A robotkarok, estünkben robotkar kiinduló konfigurációjának indexe a négyzetes mátrixban egy tömbben tárolva.
+\item Ends int [ ] - A robotkar, robotkarok célkonfigurációjának indexe a négyzetes mátrixban. 
+\item MatrixLength int - A négyzetes mátrix egy dimenziójának mérete.
+\item Distance List< List< long > > - A négyzetes mátrix, két dimenziós Listában eltárolva.
+\item Disjunctions List< long[ ] > - A GTSP csoportjainak index tömbjét tartalmazó lista.
+\end{itemize}
+
+\subsubsection*{Az osztály fontosabb függvényei}
+
+\paragraph{public double CalculateWeight(List<double> from, List<double> to):}
+Az élsúlyok számítása a CalculateWeight függvényel történik. A függvény a bemenetén kapott két robotkonfiguráció között határozza meg a robotkar csuklóinak maximális mozgási idejét. Azért a maximálisra van szükségünk, mert a robotkar mozgása során a csuklók egyszerre mozognak, így a kar mozgásideje a legtovább mozgó csukló mozgásideje lesz. A mozgásidő számítására a Megoldás című fejezetben leírt trapézmodell implementációját használom.
+
+
+\paragraph{private void CreateMatrix():}
+A négyzetes mátrixot egy distance List< List< long > >-ban tárolom el, a distance a négyzetes mátrixot sorfolytonosan tárolja el, azaz a belső List< long > a mátrix egy sorát írja le. Distance-t a CreateMatrix függvény segítségével építem fel. A CreateMatrix függvény soronként építi fel a distance-t. A distance oszlop indexe a külső List indexének felel meg és a sor indexe a belső List indexének. A distanceben a külső oszlop indexén keresztül a négyzetes mátrix egy sorát kapjuk meg.  Minden sor és az oszlop indexhez egy-egy robotkonfiguráció tartozik. A distance egy oszlop és egy sor indexével egy súly értéket kapunk az oszlop index robotkonfigurációjából a sor index robotkonfigurációjába. Ugyanazon értékű sor és oszlop index ugyan arra a robotkonfigurációra hivatkozik. Az indexek növekvő sorrendje egy robotkonfigurációs sorrendet ad,  ez a sorrend:
+
+\begin{itemize}
+\item A 0. indexű elem a robotkar kiinduló konfigurációja
+\item Ezt követik az egyes munkadarabok felvételi robotkonfigurációi, a konstruktorban kapott Workpiece lista sorrendje szerint.  
+\item Utána az egyes munkadarabok lerakási robotkonfigurációi, a konstruktorban kapott Workpiece lista sorrendje szerint.  
+\item Végül az utolsó indexű elem a robotkar cél konfigurációja. 
+\end{itemize}
+
+Az itt felsorolt négy csoporthoz különböző módon de a csoportok tagjainak egységes logika mentén lehet meghatározni a hozzátartozó distancebeli sor élsúlyait. Az egyes csoportoknak külön függvényeket hoztam létre amivel megállapítható a hozzájuk tartozó sor súlyai. A függvényeket megfelelő sorrendben meghívva pedig felépítjük a distance-t. Egy ilyen függvényre példa:
+
+A függvény egy robotkonfigurációhoz végigmegy az összes sorindexhez tartozó robotkarkonfigurációkon és amelyek között fut él a Megoldás című fejezetben bemutatott GTSP gráfban, ott kiszámítja a súlyértéket, amúgy meg a legnagyobb lehetséges súlynak megfelelő értéket rak be, ami több nagyságrenddel nagyobb mint egy súlyérték, így ezt az élet soha nem fogja választani a megoldó.
+
+
+\paragraph{void CreateDisjunctions():} 
+
+Elkészíti a GTSP gráf csoportjainak listáját.
+
+\paragraph{public List<double> ElementAt(int index)}
+
+Visszaadja a négyzetes mátrix egy indexéhez tartozó robotkonfigurációt.
+
+\subsection{Solver}
+
+A Solver osztály feladata a keresés paramétereinek beállítása, callback függvény előállítása a Google OR-Tools számára, és a keresés futtatása majd az eredmény elmentése. A keresés során kétféle metaheurisztikát lehet beállítani a Solver osztállyal, az egyik egy egyszerű hegymászó keresés a másik pedig tabu keresés.
+
+\subsubsection*{Az osztály propertijei}
+
+\paragraph{public RouteTime double:}
+
+Visszaadja a tervezett sorrend robotkarral történő bejárásának idejét. 
+
+\paragraph{public  Solution List<List<double>>:}
+
+A sorrendtervezés megoldását tartalmazó lista.
+
+\subsubsection*{Az osztály függvényei}
+\paragraph{public Solver(IDistanceMatrix matrix):}
+
+Az osztály konstruktora egy négyzetes mátrixot vár.
+
+\paragraph{public void SetHilClimbingSerach():}
+
+A következő tervezést a hegymászó algoritmussal futtatja. 
+
+\paragraph{public void SetTabuSearch(int nanos):}
+
+A következő tervezést a tabu algoritmussal futtatja, nanos-ban (ns) megadott ideig.
+
+\paragraph{public void Solve():}
+
+Futtatja a sorrendtervezést.
+
+\section{IntegarateServices}
+
+Az IntegrateSerices osztály feladat a SequencePlanning, CollisionLibrary és InverseMap könyvtárak megfelelő használata, ezzel az egész munkafolyamat megvalósítása. Az IntegrateServices függvényein keresztül egy interface-t ad számunkra amelyen keresztül elérhetőek, beállíthatóak az egyes részfolyamatok, inverz kinematika, sorrendtervezés, pályatervezés, vagy az egész folyamat egyben.
+
+A program gyorsaságának és helyességének tesztelésekor az egész folyamatot hajtottam végre. Egy teszteset lefutás a következő szekvenciadiagram 
+
+A Megoldás című fejezetben leírt, két prm történő pályatervezést a következőféleképpen implementáltam:
+
+\subsection{Az osztály propertijei}
+
+\paragraph{Workpices List< Worpiece > :}
+
+Az osztály munkadarabjainak gettere és settere.
+
+\paragraph{StartConfig List< double > :}
+
+A robotkar kezdőpontjának gettere és settere.
+
+\paragraph{EndConfig List< double >:}
+
+A robotkar végpontjának gettere és settere.
+
+\paragraph{Sequence List< List< double > >:}
+
+A sorrendtervezés megoldásának gettere.
+
+\paragraph{SequenceTime double :}
+
+A sorrendtervezés megoldásának a robotkarra történő bejárásának ideje.
+
+\paragraph{CollisionfreePath : List< Config >: }
+
+Az ütközésmentes pályatervezés megoldása.
+
+\paragraph{PathTime double :}
+
+Az ütközésmentes pálya bejárási ideje.
+
+\subsection{Az osztály függvényei}
+
+\paragraph{public IntegarateServices(): }
+Az osztály paraméter nélküli konstruktora.
+\paragraph{public IntegrateServices(List<double> startConfig, List<double> endConfig):}
+A konstruktor beállítja a robotkar kezdő és véghelyének értékét.
+
+\paragraph{public AddWorkpieces(List< Worpiece >) :}
+A munkadarabokhoz egy munkadarab listát ad hozzá.
+\paragraph{public AddWorkpieces(List<double[][]> graspLocationMatrixes, List<double[][]> putawayLocationMatrixes) :}
+A munkadarabokhoz egy munkadarab listát ad hozzá. A bemeneti paraméterek listájának homogén transzformációs mátrixain elvégzi az inverz kinematikát és munkadarabokat hoz létre belőlük.
+\paragraph{public AddCollisionfreeWorkpieces(List< Worpiece >) :}
+A bemeneti paraméterként megadott listán elvégzi az ütköző robotkonfigurációk szűrését és hozzáadja az osztály által tárolt munkadarabokhoz.
+\paragraph{public AddCollisionfreeWorkpieces(List<double[][]> graspLocationMatrixes, List<double[][]> putawayLocationMatrixes) :}
+A munkadarabokhoz egy munkadarab listát ad hozzá. A bemeneti paraméterek listájának homogén transzformációs mátrixain elvégzi az inverz kinematikát, ütköző konfigurációk szűrését és munkadarabokat hoz létre belőlük.
+
+\paragraph{public void SetHilClimbingSerach():}
+A következő sorrendtervezést a hegymászó algoritmussal futtatja. 
+\paragraph{public void SetTabuSearch(int nanos):}
+A következő sorrendtervezést a tabu algoritmussal futtatja, nanos-ban (ns) megadott ideig.
+\paragraph{public void SequencePlanning():}
+Futtatja a sorrendtervezést.
+
+\paragraph{public void BuildOpenArmPRM():}
+A függvény segítségével nyílt pofa állású megfogóval építünk egy PRM keresési térképet.
+\paragraph{public void SaveOpenArmPRM(string fileName):}
+Lementi a nyílt pofa állású megfogó keresési térképét.
+\paragraph{public void LoadOpenArmPRM(string fileName):}
+Betölti a nyílt pofa állású megfogó keresési térképét.
+\paragraph{public void BuildClosedArmPRM():}
+A függvény segítségével zárt pofa állású megfogóval építünk egy PRM keresési térképet.
+\paragraph{public void SaveClosedArmPRM(string fileName):}
+Lementi a zárt pofa állású megfogó keresési térképét.
+\paragraph{public void LoadClosedArmPRM(string fileName):}
+Betölti a zárt pofa állású megfogó keresési térképét.
+\paragraph{private  List<Config> GetSmoothedPath(Config a, Config b, IMultiQueryPathPlanner prm):}
+Az a-ból b-be egy ütközésmentes simított pályát tervez a prm-segítségével.
+\paragraph{public void PathPlanning():}
+Futtatja a ütközésmentes pályatervezési eljárást.

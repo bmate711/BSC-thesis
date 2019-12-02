@@ -1,7 +1,9 @@
 \chapter{Feladat definíció nov 15}
 
 A szakdogalzati feladatom egy közel valós idejű sorrend és pályatervezési általános megoldó készítése, robotos pakolási feladatokhoz. 
-A pakolási feladatot egy darab nyílt kinematikai láncú robotkar hajtja végre. A robotkar munkatere előre adott. A pakolási feladat munkadarabjai egy sík felületű tálcán helyezkednek el. Ez a tálca egy rázóasztalra van erősítve, ennek segítségével a munkadarabokat jól el lehet különíteni, az esetek nagy részében így nem fedik egymást, a robotkar hozzájuk tud férni. A pakolási feladatott előre adott számú munkarabbal hajtjuk végre. A munkadarabok célhelyzete előre meghatározott. A pakolási feladat megoldása során tetszőleges sorrendben fel kell vennünk az egyes munkadarabokat és a célhelyzetükbe kell vinnünk őket. A pakolási feladatnak vége, ha az összes munkadarabot eljuttatjuk a célhelyzetébe. Ekkor a tálcán nem találhatóak munkadarabok. Ha a tálcára új munkadarabokat helyezünk, akkor azoknak a pakolását egy következő feladatnak tekintjük.
+A pakolási feladatot egy darab nyílt kinematikai láncú robotkar hajtja végre. A robotos munkaállomás terve előre adott. A pakolási feladat munkadarabjai egy sík felületű tálcán helyezkednek el. Ez a tálca egy rázóasztalra van erősítve, ennek segítségével a munkadarabokat jól el lehet különíteni, az esetek nagy részében így nem fedik egymást, a robotkar hozzájuk tud férni. 
+%A pakolási feladatott előre adott számú munkarabbal hajtjuk végre. --> ez a sorrendtervezési feladat 
+A munkadarabok célhelyzete előre meghatározott. A pakolási feladat megoldása során tetszőleges sorrendben fel kell vennünk az egyes munkadarabokat és a célhelyzetükbe kell vinnünk őket. A pakolási feladatnak vége, ha az összes munkadarabot eljuttatjuk a célhelyzetébe. Ekkor a tálcán nem találhatóak munkadarabok. Ha a tálcára új munkadarabokat helyezünk, akkor azoknak a pakolását egy következő feladatnak tekintjük.
 
 A megoldó a szükséges bemeneti paraméterek magadása után, ilyen például a munkadarabok helyzete, egy a robotkar által ütközésmentesen bejárható pályát ad vissza. Ez az út időben egy közel optimális megoldása a munkadarabok célba juttatásának.
 
@@ -9,16 +11,20 @@ Mivel közel valós időben szeretnénk végrehajtani a pakolási feladatot, ez�
 
 A feladat megoldás három részre bontható, ez a három: 
 \begin{itemize}
-\item {inverz kinematika,}
+\item {inverz kinematika,} % (mely a feladatban adott munkadarab pozíciókból robotkonfigurációt számít) -> irodali áttekintésben leírva
 \item {sorrendtervezés és robotkarkonfigurációs lista választás,} 
-\item {pályatervezés.}  
+\item {ütközésmentes pályatervezés.}  
 \end{itemize}
 
 [KÉP]
 
 \section{Bemeneti paraméterek}
 
-A feladat megoldása során szükségesek bizonyos bemeneti paraméterek, amiket a megoldás során állandónak tekintünk. Ezek az értékek lehetnek előre adottak vagy az érzékelők adatai alapján generáltak. Az adott, állandó konstans érték, lehet például a környezet modellje vagy a robotkar egyes paraméterei.  
+A feladat megoldása során szükségesek bizonyos bemeneti paraméterek. Ezek az értékek lehetnek előre adottak vagy az érzékelők adatai alapján generáltak. Az adott, konstans érték, lehet például a környezet modellje vagy a robotkar egyes paraméterei.  
+
+\subsection{Munkadarabok száma}
+
+A feladatom során a munkadarabok száma előre adott. Legyen ezen munkadarabok számának jelölése NW.
 
 \subsection{Munkadarabok kiinduló- és célhelyzete}
 
@@ -26,9 +32,9 @@ A munkadarabok kiindulási helyzete egyes érzékelők adatai alapján meghatár
 
 Nem elegendő egy munkadarab pontos helyének leírásához egy a robotkar rögzítési pontját origónak tekintő Descartes koordináta rendszert használni. Mivel a munkadarabok nem pontszerű testek, így nem elég tudni csak a munkadarabok tengelyekhez mért távolságát. Egy munkadarab több félé pozícióban helyezkedhet el aszerint, hogy hány stabil egyensúlyi helyzete van.
 
-A munkadarabok pontos helyének leírásához az elméleti összefoglalóban már említett világkoordináta rendszert használjuk. Ekkor a térben az egyes munkadarabok helyzetét egy két dimenziós homogén transzformációs mátrix írja le. Az egyes munkadarabok kiinduló helyéhez egy ilyen mátrixot rendelhetünk bemeneti paraméterként. Legyen ennek a kiindulóhely mátrixnak az i-edik munkadarabhoz rendelt jele WS$_i$.
+A munkadarabok pontos helyének leírásához az elméleti összefoglalóban már említett feladat teret használjuk. Ekkor a térben az egyes munkadarabok helyzetét egy homogén transzformációs mátrix írja le. Az egyes munkadarabok kiinduló helyéhez egy ilyen mátrixot rendelhetünk bemeneti paraméterként. Legyen ennek a kiindulóhely mátrixnak az i-edik munkadarabhoz rendelt jele WS$_i$.
 
-A munkadarabok célhelyzete előre meghatározott. Megoldandó feladattól függ, hogy az egyes munkadarabokhoz ugyanazt vagy egyedi célhelyzetet rendeljünk. Az általánosabb használhatóság miatt, minden egyes munkadarabhoz célszerű egyedi értéket rendelnünk. A kiindulóhelyzethez hasonlóan a célhelyzetet is világkoordináta rendszerben adjuk meg. Legyen az i-edik munkadarab célhelyzet mátrixának jele WE$_i$.
+A munkadarabok célhelyzete előre meghatározott. Megoldandó feladattól függ, hogy az egyes munkadarabokhoz ugyanazt vagy egyedi célhelyzetet rendeljünk. Az általánosabb használhatóság miatt, minden egyes munkadarabhoz célszerű egyedi értéket rendelnünk. A kiindulóhelyzethez hasonlóan a célhelyzetet is faladat térben adjuk meg. Legyen az i-edik munkadarab célhelyzet mátrixának jele WE$_i$.
 
 
 \subsection{Robotkar kiinduló- és végállapota}
@@ -40,9 +46,9 @@ A robotkar egy állását az egyes csuklók szögeinek megadásával jellemezhet
 Abban az esetben ha R$_s$ és R$_e$ megegyezik a robotkar mozgása során pályáról, abban az esetben ha különböznek útról beszélhetünk.
 
 
-\subsection{Robotkar és a munkatér modellje}
+\subsection{Robotkar és a cella modellje}
 
-A robotkarmozgását leíró kinematikai számításoknál szükségünk van a robotkar modelljére. A robotkar térbeli leírását úgy kapjuk meg, hogy a robotkar, különálló, különmozogni képes részeit egy térbeli testtel közelítjük. Nem elég tudnunk ezeket a térbeli testeket. Szükségünk van még egy szabályrendszerre amely leírja a testek elhelyezkedését, mozgását és egymással való kapcsolatukat.
+A robotkarmozgását leíró kinematikai számításoknál szükségünk van a robotkar modelljére. A robotkar térbeli leírását úgy kapjuk meg, hogy a robotkar, különálló, külön mozogni képes részeit egy térbeli testtel közelítjük. Nem elég tudnunk ezeket a térbeli testeket. Szükségünk van még egy szabályrendszerre amely leírja a testek elhelyezkedését, mozgását és egymással való kapcsolatukat.
 
 Egyes robotkaros problémák megoldása során szükségünk lehet a robotkar munkaterében lévő környezet leírására. Itt is a különálló részeket egy térbeli testtel közelítjük és egy szabályrendszerrel leírjuk az egyes testek elhelyezkedését és környezetükkel való kapcsolatát.
 
@@ -50,7 +56,7 @@ Esetünkben a robotkar, munkadarabok és munkaasztal leírására van szükség.
 %A robotkar és környezetének modellje elengedhetetlen a robotos projektek fejlesztése során. A modell segítségével vizsgálhatjuk meg a robot és környezete kölcsönhatását. A robot és a környezet is egy térbeli testtel közelítjük. Ha a robot és környezete kölcsönhatását vizsgáljuk, elegendő csak a térbeli testek ütközését vizsgálni. A környezet és a robotkar is különálló elemekből épül fel. Egy elem háromdimenziós modelljét a hozzátartozó STL fájl írja le. Bemeneti paraméterként ezekre az STL fájlokra van szükségünk.
 
 \subsection{Robotkar általános paraméterei}
-Ahhoz hogy a robotkar mozgását vizsgáljuk szükséges tudnunk a mozgását befolyásoló paramétereket. Egy robotkar csuklókból és a csuklókat összekötő kartagokból áll. Az utolsó kartag végére jellemzően valamilyen eszközt rögzítenek, amivel a robot tudja érzékelni vagy befolyásolni környezetét. Robotkaros pakolási feladatoknál általában ez a munkadarabok megfogásához szükséges eszköz.  
+Ahhoz hogy a robotkar mozgását vizsgáljuk szükséges tudnunk a mozgását befolyásoló paramétereket. Egy robotkar csuklókból és a csuklókat összekötő kartagokból áll. Az utolsó kartag végére álatlában végberendezést rögzítenek, amivel a robot tudja érzékelni vagy befolyásolni környezetét. Robotkaros pakolási feladatoknál általában ez a munkadarabok megfogásához szükséges eszköz.  
 
 A tervezés és modellezés során a robotkar gyári adatait használjuk. Fontos azonban kiemelni, hogy a robotkarok rendelkeznek a gyártási pontatlanságokból adó eltérésekkel. Ezen eltérések nagyban befolyásolhatják a robotkar mozgását. Ezért éles használat előtt korrigálni kell ezen adatokat.
 
@@ -59,7 +65,15 @@ A tervezés során a SZTAKI-ban megtalálható UR5-ös robotkart vettem alapul. 
 
 A robotkar csuklóinak száma nagyban befolyásolja egy robot kar mozgási képességeit. Egy egy csuklóból álló robotkar egy tengely mentén képes mozgást végezni. A robotkar csuklószámának növelésével nő a robotkar mozgásának bonyolultsága, több tengely, dimenzió mentén képes mozogni a kar. Jelölje a robotkar csuklóinak számát NJ. UR5-ös robot esetében az NJ értéke 6.
 
-\subsubsection{A kar mozgását befolyásoló paraméterek}
+\subsubsection{Denavit‑Hartenberg paraméterek}
+
+A Denavit‑Hartenberg(D-H) paramétereket a robot kinematikai leírására használjuk, segítségükkel könnyen átválthatjuk a robotkar csuklóállásaival leírt pont helyét világkoordináta rendszerbe. A feladat során az inverz kinematikánál és a pályatervezésnél használom fel.
+UR5-ös robot esetén ezek a paraméterek:
+[Táblázat]
+%A robot mozgásának matematikai számításához szükségünk van az egyes kartagok hosszára. Legyen d0 a robot kar rögzítési pontját és az első csuklót összeköt kartag hossza, az első és második csuklót összekötő kartag hossza d1 és így tovább.
+
+
+\subsubsection{Sebesség- és gyorsulásparaméterek}
 
 A robotkar mozgását a kar csuklóinak paramétereivel jellemezhetjük. A feladat megoldása során két ilyen csuklóparamétert használtam fel, ezek a paraméterek a csukló szöggyorsulása és szögsebessége.
 
@@ -71,54 +85,55 @@ Tapasztalatok szerint az  UR5-ös robotnál ezek az értékek jó közelítést 
 UR5-ös robotkar esetén ezek az értékek:
 [Táblázat]
 
-\subsubsection{Denavit‑Hartenberg paraméterek}
-
-A Denavit‑Hartenberg(D-H) paramétereket a robot kinematikai leírására használjuk, segítségükkel könnyen átválthatjuk a robotkar csuklóállásaival leírt pont helyét világkoordináta rendszerbe. A feladat során az inverz kinematikánál és a pályatervezésnél használom fel.
-UR5-ös robot esetén ezek a paraméterek:
-[Táblázat]
-%A robot mozgásának matematikai számításához szükségünk van az egyes kartagok hosszára. Legyen d0 a robot kar rögzítési pontját és az első csuklót összeköt kartag hossza, az első és második csuklót összekötő kartag hossza d1 és így tovább.
-
 \subsubsection{Megfogó paraméterei}
 
 A robotkar végén elhelyezkedő eszköz esetünkben egy a pakolási feladat munkadarabjait megfogni képes megfogó. A munkám során két paraméterét használta fel, egyik a megfogó eszköz hossza, jelölje Gh a másik a megfogó pofák egymástól való távolsága ez legyen Gw. Ezeket az adatokat a pályatervezésnél és az inverz kinematikánál használom fel.
 
-\section{Feladat definíció}
+\section{Megoldási terv}
 
 A szakdolgozat során három részfeladatot kell megoldanom, ezeket a fejezet bevezetésében már említettem. Az egyes részfeladatok kimenetele lesz az azt követő részfeladat egyik bemenete. A szakdolgozatom során megtervezem és egymásba fűzöm ezeket a feladatrészeket. A következőkben szeretném definiálni a részfeladatokat. 
 
 \subsection{Inverz kinematika}
-Az első részfeladat ami szükséges megoldani a munkadarabok kiinduló és célhelyzetének átszámítása robotkar által értelmezhető vonatkoztatási rendszerbe. Ekkor egy munkadarab világkoordináta rendszerbeli elhelyezkedését kell átváltanunk robotkonfigurációba. Egy ilyen transzformáció nem egyértelmű, egy világkoordinátához több robotkar konfiguráció is tartozhat.
+Az első megoldandó részfeladat a munkadarabok kiinduló és célhelyzetének átszámítása robotkar által értelmezhető vonatkoztatási rendszerbe. Ekkor egy munkadarab világkoordináta rendszerbeli elhelyezkedését kell átváltanunk robotkonfigurációba. Egy ilyen transzformáció nem egyértelmű, egy világkoordinátához több robotkar konfiguráció is tartozhat.
 
-Az inverz kinematikai számítás bemenete egy világkoordináta mátrix és a robotkar fizikai paraméteri. A kimeneti paramétere pedig egy lehetséges robotkar konfigurációkat tartalmazó lista. Ebben a listában azok a robotkar konfigurációk vannak benne, amiket egy ideális, kiterjedés nélküli robotkar képes felvenni, a képzetes gyökkel és nagy számítási hibával rendelkező konfigurációkat nem tartalmazza.
+Az inverz kinematikai számítás bemenete egy homogén transzformációs mátrix és a robotkar fizikai paraméteri. A kimeneti paramétere pedig egy lehetséges robotkar konfigurációkat tartalmazó lista. Ebben a listában azok a robotkar konfigurációk vannak benne, amiket egy ideális, kiterjedés nélküli robotkar képes felvenni, a képzetes gyökkel és nagy számítási hibával rendelkező konfigurációkat nem tartalmazza. A inverz kinematika kimenete ez a lista, melynek jele legyen IC.
 
 Az inverz kinematikai transzformáció azonban nem vizsgálja a környezet és robot kölcsönhatását. Ahhoz, hogy megkapjuk a lehetséges robotkar konfigurációkat, a listából ki kell szűrnünk azokat a konfigurációkat ahol a robotkar ütközik önmagával vagy a környezettel.
 
 [KÉP]
+\subsection{Ütköző robotkonfigurációk kiszűrése}
+
+Az inverz kinematikai transzformáció azonban nem vizsgálja a környezet és robot kölcsönhatását. Ahhoz, hogy megkapjuk a lehetséges robotkar konfigurációkat, az IC listából ki kell szűrnünk azokat a konfigurációkat ahol a robotkar ütközik önmagával vagy a környezettel. Az ütközésmentes robotkonfigurációk megállapításához szükségünk van bemeneti paraméterként az IC listára és a robotkar és cella modelljére. A folyamat kimeneteli paramétere pedig az ütközésmentes robotkonfigurációkat tartalmazó IF lista. 
+
 \subsection{Sorrendtervezés és robotkonfigárációs lista választás}
 
 A sorrendtervezés és a robotkonfiguráció választás két különálló feladat, de esetünkben ezek összekapcsolódnak. A részfeladat megoldása során törekszünk a időben legrövidebb sorrend kiválasztására. Mivel egy munkadarabhoz több robotkarkonfiguráció is tartozik, nem tudjuk munkadarabok sorrendjét a robotkarkonfigurációk figyelembe vétele nélkül meghatározni. 
 
 A részfeladat megoldása során egy döntést kell hoznunk, hogy melyik szabályos robotkarkonfigurációs sorrendet választjuk.  
 A pakolási feladatot szeretnénk időben a legrövidebb idő alatt végrehajtani, ezért azt a sorrendtervezési és robotkarkonfigurációs lista választási eljárást keressük ami futási időben és megoldás idejét tekintve időben a lehető legkedvezőbb.
-Mivel nagyon sok jó megoldása létezik a feladat megoldásának és közel valós időben szeretnénk megoldani a pakolási feladatot, célszerű valamilyen heurisztikát használni a számunkra legkedvezőbb megoldás kiválasztásához. A részfeladat kimenetele a döntés eredménye lesz.
+Mivel nagyon sok jó robotkonfigurációs lista létezik a feladat megoldására és közel valós időben szeretnénk megoldani a pakolási feladatot, célszerű valamilyen heurisztikát használni a számunkra legkedvezőbb robotkonfigurációs lista kiválasztásához.  
+
+A folyamat bemeneti paramétere az IF robotkonfigurációs lista és a robot sebesség- és gyorsulásparaméterei.
+A részfeladat kimenetele a döntés eredménye lesz. Legyen a kiválasztott robotkarkonfigurációs lista C és a lista i-edik eleme C$_i$.
+%Kimenete pedig a kiválasztott robotkarkonfigurációs lista C aminek az i-edik eleme C$_i$.
  
 %A sorrendtervezés során azt az összes lehetséges jó munkadarab felvételi és lerakási robotkarkonfigurációs sorrendet határozzuk meg. Egy robotkarkonfigurációs sorrend jó, ha az összes munkadarabot egymás után felvesszük a kiindulóhelyzetén és letesszük a célhelyzetén. Először ezeket kell meghatároznunk. A sorrendtervezés kimenete egy lista lesz ami tartalmazza a jó robotkarkonfigurációs sorrendeket. Legyen ez a lista S és a lista i-edik eleme S$_i$.
 
 %A robotkarkonfigurációs lista választásnál cél, hogy a számunkra legkedvezőbbet válasszuk ki az S listából. A pakolási feladat megoldása szempontjából a számunkra legkedvezőbb eset a minél gyorsabb végrehajtás. Ezért meg kell keresnünk a S listából a robotkar által leggyorsabban végrehajtható sorrendet. Mivel a sorrendtervezés során nagyon sok robotkarkonfiguráció vizsgálunk az S mérete igen nagy. Célunk, hogy  közel valós időben oldjuk meg a pakolási feladatot, ezért az S listából valamilyen heurisztika szerint kell kiválasztanunk a számunkra megfelelőt. 
 
 
-Legyen a kiválasztott robotkarkonfigurációs lista C és a lista i-edik eleme C$_i$.
+%Legyen a kiválasztott robotkarkonfigurációs lista C és a lista i-edik eleme C$_i$.
 
 [KÉP]
 
 
 \subsection{Pályatervezés}
-A pályatervezés során két robotkarkonfiguráció között szeretnénk egy időben optimális ütközésmentes pályát találni. 
+A pályatervezés során két robotkarkonfiguráció között szeretnénk egy időben hatékony ütközésmentes pályát találni. 
 
 A pálytervezéshez bemenetként szükségünk van a robot és környezet modelljére és a robot paramétereire. A pályatervezést mindig ugyan annak a robotnak a munkaterében szeretnénk végrehajtani. 
 
 [KÉP]
 
-Olyan megoldást kell keresni ami gyors, mivel közel valós időben szeretnénk végrehajtani a pakolási feladatot. Ezért nem feltétlenül az időben legoptimálisabb pályát keressük, hanem egy olyan eljárást aminek a véghajtási ideje és a talált pálya bejárási ideje együtt a lehető legkisebb. Esetünkben a pályatervezést a C lista minden egyes egymást követő elemére végre kell hajtanunk, ez NJ $*$ 2 $+$ 1 darab tervezést jelent. A pályatervezési eljárás kimenete legyen egy lista amiben az egyes tervezések eredményit egymás után fűzzük.
+Olyan megoldást kell keresni ami gyors, mivel közel valós időben szeretnénk végrehajtani a pakolási feladatot. Ezért nem feltétlenül az időben optimális pályát keressük, hanem egy olyan eljárást aminek a véghajtási ideje és a talált pálya bejárási ideje együtt a lehető legkisebb. Esetünkben a pályatervezést a C lista minden egyes egymást követő elempárjára végre kell hajtanunk, ez NW $*$ 2 $+$ 1 darab tervezést jelent. A pályatervezési eljárás kimenete legyen egy lista amiben az egyes tervezések eredményit egymás után fűzzük.
 
 Legyen ennek a listának neve P és a lista i-edik eleme P$_i$.

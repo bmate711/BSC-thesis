@@ -1,2 +1,33 @@
-\chapter{Bevezetés nov 29}
-koo
+\chapter{Bevezetés HIV}
+
+Az egyre növekvő ipari fejlődés következménye, hogy manapság egyre elterjedtebbé válnak a teljesen automatizált gyártósorok. Míg régen az ipari robotok alkalmazása kizárólag a tömeggyártásban volt jellemző, manapság már a kis sorozatszámú vagy akár az egyedi gyártásban is megjelennek. Ennek következményeként megnőtt az igény az egyre bonyolultabb, változatosabb ipari robotok és robotos gyártócellák alkalmazására. Ezek már nem csak egy egyszerű ipari folyamatokat hajtanak végre, hanem egyre összetettebb feladatokat látnak el, amelyeket már nem lehet előre beállítani a gyártósor beüzemelésekor. Ehelyett célszerű mesterséges intelligenciát használni a probléma megoldásához.
+
+Az MI ilyen alkalmazásokban releváns ágai a cselekvéstervezés, a pályatervezés, és a gépi látás. Manapság, ezek a mesterséges intelligencia egyik legjobban fejlődő területei. Ehhez kapcsolódik szakdolgozat munkám, ami egy robotos pakolási feladat hatékony megoldása.
+
+A robot által végrehajtandó feladat, hogy megmunkálandó munkadarabokat vesz fel egy tálcáról és azokat egy célhelyre teszi. A feladat nehézségét az jelenti, hogy a munkadarabok véletlenszerű pozícióban helyezkednek el a tálcán és hogy közel valós időben kell végrehajtani a műveletet. Ez egy nagyon összetett folyamat, ami több különálló feladatra bontható.
+
+[KÉP]
+
+A teljes problémát és a megoldási munkafolyamatot Tipary Bence írta le [HIV]. A szakdolgozatom során ennek a munkafolyamatnak egy részét valósítom meg.
+
+Az ipari folyamat megoldása során meg kell határozni a munkadarabok pontos helyét a tálcán. Többféle érzékelőt is használható a feladat megoldására. Az egyik racionális döntés, a kamera használata, mert viszonylag olcsón beszerezhető és elegendően pontos eredményt ad. A kamera által készített képről matematikai eszközök segítségével már megállapítható a munkadarab térbeli elhelyezkedése a tálcán.
+
+Nem elegendő az, ha tudjuk, hol találhatóak a munkadarabok a tálcán, mert a robotkar nem tudja minden pontban megfogni ezeket a munkadarabokat. Így a munkadaraboknak nem csak a helyét, hanem a munkadarabokhoz tartozó megfogási pontokat is meg kell állapítanunk. Ezeknek a lehetséges megfogási pontoknak a pontos térbeli helyét a kamaraképről szintén megállapíthatjuk. 
+%Most már megvannak a munkadarabok pontos helyei és a megfogási pontjai.
+
+A robotkarok csuklókból állnak, ezeknek a segítségével képes mozogni a kar. Mozgás közben a csuklók elfordulnak. A csukló kezdőállapotához képesti elfordulás egy csuklóállást ad meg. A csuklók különböző helyzetei egy robotkar konfigurációt határoznak meg. Egy adott térbeli ponthoz, több robotkar konfiguráció is tartozhat. Nekünk meg kell határozni ezeket a robotkonfigurációkat.
+
+
+%Ez a feladatot tovább bonyolítja, mert így egy megfogási ponthoz egy időben több robotkar konfiguráció is tartozhat. Átlagosan egy X dimenziós robotkarnak egy adott ponthoz Y robotkar konfiguráció tartozik. 
+
+Ezek közül konfigurációk közül még ki kell szűrnünk azokat, amik a valóságban valamilyen okból nem jöhetnek létre, pl.: A robot önmagával vagy a cella egy másik elemével ütközik.
+
+A szűrt robotkar konfigurációkból lehet majd megállapítani a konfigurációk azon sorrendjét, amit egy jó megoldása a problémának és a lehető legrövidebb idő alatt tesz meg a robotkar. 
+
+A konfigurációk sorrendtervezése még nem a végleges megoldása a problémának. A megoldásban található, egymást követő konfigurációs párok közt még egy ütközés mentesen  bejárható lehető legrövidebb utat kell találnunk.
+
+Ezek közül a feladatom a munkadarabokhoz tartozó robotkonfigurációk meghatározása, a munkadarabok sorrendezése és az egyes megfogási és lerakási műveletekhez tartozó robot konfigurációk meghatározása és ütközésmenetes pályatervezés a robotkar számára úgy. A feladat célja, hogy a robotkar pályájának bejárási ideje és a teljes műveleti idő összege a lehető legalacsonyabb legyen.
+
+Ez az egész ipari feladat egy nagyon leegyszerűsített képe, a valós probléma során sokkal több feladattal meg kell küzdeni. Például: ha egy elem olyan pozícióban ragadat, ahol nem tudja felvenni a kar, akkor el kell érnünk, hogy elmozduljon vagy ha az egyik munkadarab akadályozza a másik felvételét, akkor azt a másik előtt kell felvennünk.
+
+A szakdolgozatomban szeretnék egy elméleti áttekintés adni, arról a tudásról, ami szükséges volt a feladat megoldása során. Részletesen bemutatni az általam megoldott feladat részeket és a hozzájuk szükséges bemeneti paramétereket. Ezek után részletezem a megoldás matematikai modelljét. Majd kitérek az általam használt könyvtárakra és a feladat implementációjára. Végezetül elemzem a kapott eredményeket és értékelem, mennyire jól sikerült megoldani a feladatot, használható lenne-e éles környezetben is és bemutatom a projekt további fejlesztési lehetőségeit.

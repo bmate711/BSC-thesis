@@ -1,83 +1,183 @@
-\chapter{Irodalmi áttekintés nov 19}
+\chapter{Irodalmi áttekintés HIV}
+
+Ebben a fejezetben szeretném röviden bemutatni azt az elméleti hátteret ami szükséges a szakdolgozati munkám megértése szempontjából. Először bemutatom a robotkarok kinematikai modellezését, aztán a sorrendtervezés és végül a pályatervezés elméleti hátterét. 
 
 \section{Robotok kinematikai modellezése}
+
+A robotok kinematikája a robotok mozgásának leírásával foglakozik, a mozgások dinamikai hátterének figyelembe vétele nélkül. 
+
 \subsection{Feladat tér}
-A robotikában a feladat tér egy pontját egy M  4x4-es homogén transzformációs mátrixszal adjuk meg. Ez a mátrix a robotkar rögzítési pontjához kötött koordináta rendszer és a robotkar végpontjához kötött koordináta rendszer között add meg egy transzformációt.
+
+A robotikában a feladat tér egy pontját egy M  4x4-es homogén transzformációs mátrixszal adjuk meg. Ez a mátrix a robotkar rögzítési pontjához kötött koordináta rendszer és a robotkar végberendezéséhez kötött koordináta rendszer között add meg egy transzformációt.
 $$ M = 
 \begin{bmatrix}
   R_{3x3} & T_{3x1}\\
   0_{1x3} & 1
 \end{bmatrix}$$
 Az M mátrix egy 3x1-es T részmátrixa írja le a rögzítési ponthoz kötött Descartes koordináta rendszerben, hogy hol található a végpont koordinátarendszere. Azt, hogy a végponthoz viszonyított koordinátarendszer, hogy helyezkedik el a rögzítési ponthoz képest, azaz a két koordinátarendszer megfelelő tengelyei milyen szöget zárnak be egymással,egy 3x3-as R részmátrix írja le. Ezzel az R részmátrixal lényegében a robotkar végének állását írjuk le. 
+\cite{Alatartsev:2015}
 
-[Robotic Task Sequencing Problem: A Survey]
-\subsection{Robotkonfigurációs tér}
+\subsection{Konfigurációs tér}
 
-A robotkar állását, konfigurációját megadhatjuk a robotkar egyes csuklóinak állásával. Ekkor C legyen az egyes csuklók állásának szögértéke. Egy 3 szabadságfokú robotkar esetén C három darab értéket fog tartalmazni.
+A robotkar állását, konfigurációját megadhatjuk a robotkar egyes csuklóinak állásával. Ekkor C legyen az egyes csuklók állásának szögértéke. Egy 6 szabadságfokú robotkar esetén C hat darab értéket fog tartalmazni.
 
-A robotkarkonfigurációs teret szokás még csukló térnek vagy robot térnek nevezni.
+A konfigurációs teret szokás még csukló térnek nevezni.
 
 [KÉP]
 
-[Robotic Task Sequencing Problem: A Survey]
-\subsection{Denavit–Hartenberg paraméter}
+\cite{Alatartsev:2015}
+\subsection{Denavit–Hartenberg paraméterek}
 
-A robotkar geometriai reprezentációját többféleképpen is megtudjuk adni.
+A robotkar geometriai reprezentációját többféleképpen is meg tudjuk adni.
 Az egyik kényelmes módja, hogy minden egyes kartaghoz egy koordinátarendszert rögzítünk. 
-Jacques Denavit és Richard Hartenberg írta le először egy konvencionális jelölésrendszert, hogy általánosítsa a kartagokhoz rendelt koordinátarendszerek leírását.A jelölésrendszer elemeit az 1955-ös publikációjuk alapján Danavit-Hartenberg paramétereknek (D-H paramétereknek) nevezzük őket.
+Jacques Denavit és Richard Hartenberg írta le először egy konvencionális jelölésrendszert, hogy általánosítsa a kartagokhoz rendelt koordinátarendszerek relatív helyzetének leírását. A jelölésrendszer elemeit az 1955-ös publikációjuk alapján Danavit-Hartenberg paramétereknek (D-H paramétereknek) nevezzük őket.
 
-Ebben a jelölésrendszerben négy paraméterre van szükségünk, hogy a egy koordinátarendszert leírjunk egy másik koordináta rendszerhez viszonyítva. A négy paraméterből kettő vonatkozik a csuklókra és kettő a kartagok leírására. A csuklóknál a hozzájuk kapcsolódó kartagok eltolása d és a csuklóállás szöge $\Theta$ . A kartagoknál a kartag hossza a és a kartag elcsavarodása $\alpha$ .
+Ebben a jelölésrendszerben négy paraméterre van szükségünk, hogy a egy koordinátarendszer relatív helyzetét leírjunk egy másik koordináta rendszerhez viszonyítva. A négy paraméterből kettő vonatkozik a csuklókra és kettő a kartagok leírására. A csuklóknál a hozzájuk kapcsolódó kartagok eltolása d és a csuklóállás szöge $\Theta$ . A kartagoknál a kartag hossza a és a kartag elcsavarodása $\alpha$ .
 
-A jelölésrendszebren az i-edik csukló az i-edik kartag végén helyezkedik el, az i-edik és i+1-edik  kartag között. A csukló eltolás d$_i$ és a csuklószög $\Theta_i$ az i-1.csukló szerint van mérve, ezért a csukló indexe és a csukló paramétereinek indexe nem egyezik meg.
+A jelölésrendszerben az i-edik csukló az i-edik kartag végén helyezkedik el, az i-edik és i+1-edik  kartag között. A csukló eltolás d$_i$ és a csuklószög $\Theta_i$ az i-1. csukló koordinátarendszere szerint van mérve, ezért a csukló indexe és a csukló paramétereinek indexe nem egyezik meg.
 
 [KÉP]
 
 
-
-[Hivatkozás: Springer Handbook of Robotics 2.6
-WIkipedia: $https://en.wikipedia.org/wiki/Denavit-Hartenberg_parameters$]
+\cite{Siciliano:2007}
 
 
-\subsection{Forward kinematika}
+\subsection{Direkt kinematika}
 
-A forward kinematika feladata nyílt kinematikai láncú robotkar esetén, hogy a kar csuklóállásainak értékéből, egy viszonyítási ponthoz tekintve, meghatározza a robotkar végpontjának helyzetét. A viszonyítási pont általában a robotkar rögzítési pontja, ami egy konstans eltolással megkapható a 0. kartagból. Általában a robotkar végére valamilyen eszközt szerelünk, hogy befolyásolni, vagy érzékelni tudja a környezetét. A robotkar végpontjának, tool frame-jének, a felszerelt eszköz végpontját szokás hívni. A tool frame megkapható egy konstans transzformációval a robot utolsó kartagjához képest.
+A direkt kinematika feladata nyílt kinematikai láncú robotkar esetén, hogy a kar csuklóállásainak értékéből, egy viszonyítási ponthoz tekintve, meghatározza a robotkar végpontjának helyzetét. A viszonyítási pont általában a robotkar rögzítési pontja, ami egy konstans eltolással megkapható a 0. kartagból. Általában a robotkar végére valamilyen eszközt szerelünk, hogy befolyásolni, vagy érzékelni tudja a környezetét. Ezt az eszközt végberendezésnek szokás nevezni. A végberendezés helyzete megkapható egy konstans transzformációval a robot utolsó kartagjához képest.
 
 A számításhoz bemeneti paraméterként két dologra van szükség, egyik a robotkar fizikai paraméterei, a másik a robotkar csuklóállásainak értéke.
 
-A forward kinematikai probléma megoldása egy transzformáció egy a robotkar rögzítési pontjához kötött koordináta rendszerből a tool-framehez kötött koordináta rendszerbe, azaz a felszerelt eszköz és a rögzítési pont között. Ezt a transzformációt egy  4x4-es homogén transzformációs mátrixszal szokás leírni. A transzformáció egyértelmű, mert egy robotkarkonfigurációhoz egy homogén transzformációs mátrixot rendel. 
+A direkt kinematikai probléma megoldása egy transzformáció egy a robotkar rögzítési pontjához kötött koordináta rendszerből a végberendezéshez kötött koordináta rendszerbe, azaz a felszerelt eszköz és a rögzítési pont között. Ezt a transzformációt egy  4x4-es homogén transzformációs mátrixszal szokás leírni. A transzformáció egyértelmű, mert egy robotkarkonfigurációhoz egy homogén transzformációs mátrixot rendel. 
 
-[Hivatkozás: Springer Handbook of Robotics 2.6]
+\cite{Siciliano:2007}
 
 \subsection{Inverz kinematika}
+
+Nyílt kinematikai láncú robotkar esetén, az inverz kinematika feladata, hogy egy
+homogén transzformációs mátrixszal leírt ponthoz megadja a hozzá tartozó robotkarkonfigurációk értékét, azaz feladat térbeli ponthoz meghatározza a hozzátartozó konfigurációs térbeli pontokat.
+
+A feladat megoldásához két paraméter szükséges, a homogén transzformációs mátrix és a robotkar fizikai paraméterei.
+
+Ez egy nem lineáris transzformáció, előfordulhat, hogy nincs megoldása vagy akár több megoldása is lehet. Ha a feladattérbeli pont a robotkar munkaterén kívül esik, akkor biztosan nincs megoldása az egyenletnek. Az inverz kinematikai transzformációt kétféle módszerrel lehet megoldani. Az egyik a zárt alakú megoldás, de ez csak bizonyos fizikai szerkezetű robotkarokra értelmezhető. A másik módszer a numerikus számítás, ez általánosan megadható.
+
+
+\subsubsection{Zárt alakú megoldás}
+
+A zárt alakú megoldás nagy előnye, hogy gyorsabb mint numerikus alak kiszámítása és az összes lehetséges megoldást megadja. Hátránya pedig, hogy nem minden robotkarra lehet megadni és hogy minden robotkarra más. Zárt alakú megoldás során a robotkar egyedi geometriai adottságait használjuk ki. Általában, zárt alakú megoldás csak speciális hat szabadsági fokú robotkarokra adható, ahol sok robotkar paraméter nulla. Elégséges feltétele, hogy létezzen zárt kinematikai megoldása egy hat szabadsági fokú robotkarnak:
+
+\begin{itemize}
+\item {Három egymást követő csukló tengelye egy pontban metszi egymást.}
+\item {Három egymást követő csukló tengelye párhuzamos.} 
+\end{itemize}
+
+A zárt alakú módszert algebrai és geometriai úton oldhatjuk meg.
+A szakdolgozatom során használt UR5-ös robotkarnak létezik zárt alakú megoldása.
+
+\subsubsection{Numerikus megoldás}
+
+A zárt alakú megoldással ellentétben a numerikus alak megoldása nem függ a robotkartól. A hátránya a zárt alakú megoldáshoz képest, hogy lassabb és nem mindig találja meg az összes lehetséges megoldást. A numerikus alakú módszer megoldható szimbólum kiküszöbölési, folyamatos és iteratív úton.
+
+\cite{Siciliano:2007}
+
+
 \section{Sorrendtervezés}
-\subsection{GTSP}
-\subsection{LNS}
-\subsection{Megoldó algoritmusok}
+
+Sorrendtervezés során célunk adott feladat végrehajtási sorrendjére egy megengedett és optimális megoldási sorrendet adnunk.
+
+\subsection{Sorrendtervezési modellek}
+A sorrendtervezési modellek azért hasznosak, mert segítségükkel egy mérnöki problémához általánosan ismert matematikai modellt rendelünk. Egy sorrendtervezési feladatot nehézsége szerint négy csoportba tudunk sorolni. 
+
+A nehézség megállapítására két paramétert tudunk használni, egyik a bemeneti paraméterek típusa, másik a kimeneti paramétereké. Egy sorrendtervezési feladat bemenet állhat egyszerű feladatokból, például a munkadarabok helyzete vagy összetett feladatokból, ilyen lehet a hegesztési varratok pályája. A kimeneti paraméter lehet a feladatok elvégzésének sorrendje vagy a feladat végrehajtásának ütközésmentes pályája. 
+
+A szakdolgozati feladatom során a sorrendtervezési fázisban egy egyszerű feladatokból álló problémát oldok meg aminek kimenetele a feladatok elvégzésének sorrendje. A következőkben ennek a csoportnak a matematikai modelljeit szeretném bemutatni.
+
+[KÉP: Robotic Task Sequencing Problem: A Survey fig. 3 részlet]
+ 
+\subsubsection{TSP}
+
+A TSP-t (Travelling Salesman Problem) magyarul Utazó Ügynök Problémának hívják. A TSP során egy összefüggő súlyozott gráf csúcsai közt kell megtalálnunk a lehető legrövidebb kört úgy, hogy csak a gráf élein lépkedhetünk a csúcsok között. A kör hossza a bejárt élsúlyok összege lesz. Általában a gráfról feltételezzük hogy két pontja között, A és B, A-ból B-be vezető út súlya megegyezik a B-ből A-ba vezető út súlyával. Ez egy NP nehéz probléma, ami azt jelenti hogy nincs polinomiális lépésszámú megoldása. Nagyméretű TSP-t ezért csak valamilyen metaheurisztika segítségével tudjuk megoldani. 
+
+\subsubsection{ATSP}
+Az Asymmetric TSP (ATSP) azaz Aszimmetrikus Utazó Ügynök Probléma az Utazó Ügynök Probléma egy olyan változata, amikor a gráf két pontja közt, A és B, nem feltétlen ugyan akkora az út súlya, ha A-ból megyünk B-be vagy B-ből megyünk A-ba.
+
+\subsubsection{GTSP}
+A GTSP a Genaralized TSP rövidítése, azaz Általános Utazó Ügynök Probléma. Ebben az esetben az összefüggő súlyozott gráf csúcsait csoportokba rendezzük és a gráfban egy olyan legrövidebb pályát kell találnunk ami minden csoportot legalább egyszer érint. 
+\subsubsection{SSP}
+A Shortest Sequence Problem azaz a Legrövidebb Sorrend Problémája a TSP egy olyan változata amikor az összefüggő súlyozott gráfban, a kör helyett egy olyan legrövidebb utat kell találnunk ami az összes csúcsot érinti. Az SSP-nek is van aszimmetrikus és általános változata, ekkor a ATSP-hez illetve a GTSP-hez hasonlóan a kör helyett egy legrövidebb utat kell találnunk. Ezeknek jelölése ASSP és SSP++.
+
+\cite{Alatartsev:2015}
+\subsection{Megoldó eljárások}
+
+A megoldó eljárások segítségével próbáljuk megtalálni egy feladat optimális végrehajtását. Ezek lehetnek teljes keresési eljárások, amelyek bejárják a teljes keresési teret, de ezek nagy feladatokon nem jól alkalmazhatóak vagy heurisztikus megoldók, amelyek nem mindig találják meg a legjobb megoldást, de nagy feladatokon is alkalmazhatóak. Ebben a részben heurisztikus megoldókat mutatok be. 
+
 \subsubsection{Lokális keresés}
 
-Az informatikában a lokális keresés egy heurisztikus módszer nagy számításigényű optimalizációs feladatok megoldására. A lokális keresés segítségével megtalálhatjuk a legjobb megoldást egy probléma megoldásainak halmazából. Egy lokális kereső algoritmus a megoldási térben, megoldásról megoldásra halad, lokális változásokat végrehajtva. Az algoritmusok addig futnak, amíg el nem érnek egy olyan megoldáshoz, amin már nem tudnak tovább javítani vagy amíg a keresés ideje le nem telik.
+A számításelméletben a lokális keresés egy heurisztikus módszer nagy számításigényű optimalizációs feladatok megoldására. A lokális keresés segítségével megtalálhatjuk a közel legjobb megoldást egy probléma megoldásainak halmazából. Általánosságban egy lokális kereső algoritmus a megoldási térben, megoldásról megoldásra halad, lokális változásokat végrehajtva. Az algoritmusok addig futnak, amíg el nem érnek egy olyan megoldáshoz, amin már nem tudnak tovább javítani vagy amíg a keresés ideje le nem telik.
 
-Lokális keresést nagyon sok féle nagy számítási igényű feladaton alkalmaznak, beleértve az utazó ügynök problémát is.
-Optimalizációs problémák megoldása során a lokális keresés egy célfüggvény segítségével keresi meg a megoldások közül a legjobbat. Ha az állapotteret és a célfüggvényt egy diagramon ábrázoljuk, akkor a feladat állapottérfelszínét kapjuk. Egy teljes lokális keresés mindig talál megoldást, ha az létezik. Az optimális lokális keresési algoritmusok mindig megtalálják a keresett globális minimumot vagy maximumot.
+A lokális kereső algoritmus először egy jó megoldást keres. Ezután ezen a megoldásokon kis változásokat hajt végre, hogy javítsa a megoldás teljesítményét. Ezeket a kis változásokat lépéseknek nevezzük. Egy megoldás szomszédságába azok a megoldások tartoznak amiket a megoldásból egy lépés alkalmazásával el tudunk érni. Hagyományos egy ilyen szomszédság mérete polinomiális. A kereső algoritmus ezekből a szomszédokból választ egyet a megoldás keresése során. A kereső algoritmus célja hogy optimizálja a megoldás célfüggvényének az értékét. A keresés során a lokális optimumok jelentik a legnagyobb nehézséget. A keresési algoritmus tervezésénél figyelnünk kell ezek elkerülésére. A lokális keresésnél egy alapszabály, hogy minél nagyobb a szomszédság számossága annál nehezebben ragad lokális optimumban a keresés.
 
+Lokális keresést nagyon sokféle nagy számítási igényű feladaton alkalmaztak, beleértve az utazó ügynök problémát is. Egy teljes lokális keresés mindig talál megoldást, ha az létezik. Az optimális lokális keresési algoritmusok mindig megtalálják a keresett globális minimumot vagy maximumot.
+
+\cite{Mouthuy:2012}
+\cite{russel:2003}
+
+\subsubsection{VLNS}
+
+A Very Large-Scale Neighborhood Search (VLNS) azaz Nagyon Nagyméretű Szomszédsági Keresés  esetében egy megoldás szomszédsága exponenciális nagyságú. A nagyobb számú szomszédság miatt a keresés kisebb eséllyel ragad lokális optimumba és a lokális optimum is egy jobb megoldás mintha polinomiális nagyságú szomszédságban keresnénk. Általában a VLNS úgy van strukturálva, hogy a keresési függvény polinomiális idő alatt találja meg a legjobb lépést. VLNS segítségével hatékonyabban tudjuk megoldani az optimalizációs problémákat. 
+
+\cite{Mouthuy:2012}
+
+
+%A lokális keresés valamilyen heurisztika szerint próbálja meg megtalálni az optimumot, ezek közül szeretnék röviden bemutatni párat.
 
 \subsubsection{Hegymászó keresés}
 
-A hegymászó keresés egy egyszerű mohó algoritmus, ami mindig az aktuális legjobb érték felé lép. Ha az algoritmus a következő lépésben már nem tud javítani, akkor a keresés megáll. A hegymászó keresés nem optimális lokális keresés. Mivel a keresés nem járja be a teljes állapotteret, csak amíg az eredményen javítani tud, a keresés könnyen lokális optimumban ragadhat.
+A hegymászó keresés egy egyszerű mohó algoritmus, ami mindig az aktuális legjobb érték felé lép. Ha az algoritmus a következő lépésben már nem tud javítani, akkor a keresés megáll. A hegymászó keresés nem hatékony algoritmus. Mivel a keresés nem járja be a teljes állapotteret, csak amíg az eredményen javítani tud, a keresés könnyen lokális optimumban ragadhat.
 
-\subsubsection{Szimulált lehűtés}
-
-
-A szimulált lehűtés a hegymászó algoritmus továbbfejlesztett változata. A hegymászó algoritmussal a legnagyobb probléma, hogy könnyen egy lokális optimumba juthatunk és befejeződik a keresés. Ez abból adódik, hogy a keresés során az állapottérnek csak minimális részét járjuk be. A szimulált lehűtés ezt próbálja meg kiküszöbölni. A hegymászó algoritmus mindig a legjobb lépést választja, ehelyett a szimulált lehűtés egy véletlen lépést választ. Ha a lépés javítja a célfüggvény értékét, akkor mindig végrehajtásra kerül. Ellenkező esetben az algoritmus a lépést csak P eséllyel teszi meg. A P valamilyen 1-nél kisebb szám, értéke exponenciálisan csökken a lépés értékének rosszaságával, azaz egy delta E mennyiséggel, amivel a célfüggvény értéke romlott. A valószínűség a szimulált lehűtés másik T paraméterétől is függ. A T hőmérséklet csökkentésével is csökken a rossz lépés valószínűsége. A rossz lépések esélye a szimulált lehűtés indulásánál, amikor a T nagy, elég magas, a T csökkenésével viszont egyre valószínűtlenebbekké válnak. Ha a T értékét kellően lassan csökkentjük akkor matematikailag bebizonyítható, hogy a szimulált lehűtés közel egy valószínűséggel megtalálja a keresett globális optimumot.
-
-Az algoritmus a 80-as évek elején terjedt el. A szimulált lehűtést először a VLSI nyomtatott áramkörök tervezésekor használták. Azóta széleskörben alkalmazzák a nagy számításigényű optimalizációs feladatokra.
-
-\subsubsection{Tabu keresés}
+\subsubsection{Szimulált lehűtés HIV}
 
 
+A szimulált lehűtés a hegymászó algoritmus továbbfejlesztett változata. A hegymászó algoritmussal a legnagyobb probléma, hogy könnyen egy lokális optimumba juthatunk és befejeződik a keresés. Ez abból adódik, hogy a keresés során az állapottérnek csak minimális részét járjuk be. A szimulált lehűtés ezt próbálja meg kiküszöbölni. A hegymászó algoritmus mindig a legjobb lépést választja, ehelyett a szimulált lehűtés egy véletlen lépést választ. Ha a lépés javítja a célfüggvény értékét, akkor mindig végrehajtásra kerül. Ellenkező esetben az algoritmus a lépést csak P eséllyel teszi meg. A P valamilyen 1-nél kisebb szám, értéke exponenciálisan csökken a lépés értékének rosszaságával, azaz egy  $\Delta$ E mennyiséggel, amivel a célfüggvény értéke romlott. A valószínűség a szimulált lehűtés másik T paraméterétől is függ. A T hőmérséklet csökkentésével is csökken a rossz lépés valószínűsége. A rossz lépések esélye a szimulált lehűtés indulásánál, amikor a T nagy, elég magas, a T csökkenésével viszont egyre valószínűtlenebbekké válnak. Ha a T értékét kellően lassan csökkentjük akkor matematikailag bebizonyítható, hogy a szimulált lehűtés elég hosszú idő alatt közel egy valószínűséggel megtalálja a keresett globális optimumot.
+
+Az algoritmus a 80-as évek elején terjedt el. A szimulált lehűtést először a VLSI nyomtatott áramkörök tervezésekor használták. Azóta széleskörűen alkalmazzák a nagy számításigényű optimalizációs feladatokra.
+
+\subsubsection{Tabu keresés HIV}
 
 A tabu keresés lényegében egy rövidtávú memóriával rendelkező hegymászó keresés, pár szabállyal kiegészítve. A tabu keresés során addig folytatjuk a keresést amíg ki nem elégítjük a keresés feltételét, ez lehet egy célfüggvényérték vagy a futási idő korlátozása. A tabu keresési algoritmus, ha lehet mindig olyan lépést választ, amivel javít a célfüggvény értékén. Ha nincs ilyen lehetőség akkor rontó lépést is elfogad. Az algoritmus egy véges nagyságú FIFO memóriában tárolja el a már meglátogatott csomópontokat. Ha egy csomópont benne van a memóriájában akkor oda nem lép az algoritmus. Az algoritmus képes arra, hogy kitörjön lokális optimumból. Ennek hatékonysága a FIFO méretétől függ, addig elkerüli az algoritmus a lokális optimumot amíg a csomópont a memóriában van.
 
-A tabu keresés algoritmust a 1989 években írta le Fred W. Glover. A keresési eljárást azóta széleskörben alkalmazták a logisztika, orvosbiológiai elemzés, ütemezés és egyéb nagy számítási teljesítményű optimalizációs feladatnál.
+A tabu keresés algoritmust a 1989 években írta le Fred W. Glover. A keresési eljárást azóta széleskörűen alkalmazták a logisztika, orvosbiológiai elemzés, ütemezés és egyéb nagy számítási teljesítményű optimalizációs feladatnál.
+
+\cite{russel:2003}
 
 \section{Pályatervezés}
+
+Pályatervezés során két pont között szeretnénk egy optimális hosszúságú ütközésmentes utat találni. Erre  többféle algoritmus létezik, ezek közül szeretnék párát röviden bemutatni.
+
+Pályatervezés során a konfigurációs térben tervezzük meg a robot mozgását. Jelölje a robot munkaterét C. C teret két altérre tudjuk osztani. Legyen az egyik altér C$_{obs}$, ez az a térrész ahová a robot nem tud eljutni ütközésmentesen. A C$_{free}$ = C - C$_{obs}$, azaz a robotkar által ütközésmentesen bejárható térrész.
+
+\subsection{Kombinatorikus tervezés}
+
+A kombinatorikus tervezésnél egy útvonaltérkép segítségével határozzuk meg az optimális utat. Az útvonaltérkép egy gráf C$_{free}$-ben, aminek minden csúcsa C$_{free}$-ben helyezkedik el és a csúcsok közötti élek ütközésmentes utak C$_{free}$-ben. A gráf élei súlyozva vannak aszerint, hogy a két csúcs milyen távolságra helyezkedik el egymástól. Pályatervezéskor a útvonaltérkép két pontja között egy minimális súlyösszegű utat keresünk.
+
+Az útvonaltérkép elkészítésére sok különböző eljárás létezik.
+
+Az eljárás előnye, hogy kis szabadságfokú problémákra nagyon jó megoldást add. Hátránya viszont, hogy a szabadsági fokok növekedésével nagyon gyorsan kezelhetetlenné válik a feladat mérete, ezért sok dimenziós robotkarok pályatervezésére alkalmatlan.
+
+\subsection{Mintavétel alapú tervezés}
+
+A mintavétel alapú tervezésnél nem karakterizáljuk előre a C teret. A C$_{free}$ térrész felfedezéséhez egy ütközésdetektáló algoritmusra lesz szükségünk. Az eljárás előnye, hogy sok dimenziós terek esetén sokkal gyorsabb mint egy kombinatorikus tervezési eljárás, hátránya, hogy nem minden esetben talál megoldást és ha talál, akkor sem biztos, hogy az optimálisat találja meg. A következőkben két mintavétel alapú eljárást fogok bemutatni.
+
+\subsubsection{PRM HIV}
+
+A Probabilistic Road Map (PRM) azaz Valószínűségi Útvonaltérkép egy mintavétel alapú tervezési eljárás. Az eljárás során random mintákat választunk ki a C térből, ha a minta C$_{free}$-be esik, akkor egy csúcsként értelmezzük. Aztán ezt a csúcsot próbáljuk meg összekötni a közeli csúcsokkal egy lokális tervező segítségével. A lokális tervező megvizsgálja, hogy az él a két csúcs között ütközésmentesen bejárható-e. Ha igen, akkor felvesszük az élet a csúcsok közé, ha nem akkor eldobjuk. Azt hogy melyik csúcsokat tekintjük közelinek, többféle képen definiálhatjuk, lehet a k db legközelebbi csúcs vagy egy bizonyos távolságon belül lévő összes csúcs. A gráfba addig veszünk fel csúcsokat amíg elég sűrű nem lesz az egy jó pálya megtervezéséhez.
+
+A PRM előnye, hogy alkalmazható nagy dimenziójú feladatokra, nagy valószínűséggel teljes megoldást ad és a generált térkép a C térben több pályatervezésre is felhasználható. Hátránya, hogy nem jól alkalmazható szűk átjárókban. Elegendően sok idő alatt közel 1 valószínűséggel optimális és teljes megoldást.
+
+\subsubsection{RRT HIV}
+
+Az RRT (Rapidly Exploring Random Trees) magyarul Gyorsan Felfedező Véletlenszerű Fák módszere. Az eljárás során egy q$_0$ pontból szeretnénk eljutni egy q$_g$ pontba úgy, hogy egy fa gráfot építünk. Az RRT egy iteratív eljárás, addig ismétlődik, amíg el nem érünk a q$_g$ pontban. Minden iterációban felveszünk egy q$_i$ pontot és megpróbáljuk ütközésmenetesen összekötni az addig lerakott q$_n$, legközelebbi ponttal. Ha sikerül, akkor felvesszük az élet és q$_i$ is fa része lesz. Ha nem sikerül q$_i$-t ütközésmentesen összekötni q$_n$-el akkor felveszünk egy q$_i'$ csúcsot az ütközéshez lehető legközelebb és azt kötjük be a fába. Az eljárás minden m-edik iterációjában q$_i$ = q$_g$. Ha sikerül q$_g$ bekötnünk a fába leáll az eljárás.
+
+Ez csak egy lehetséges eljárás a RRT megvalósítására. Az RRT-nek számos további továbbfejlesztett változata létezik a hatékonyabb keresés érdekében.
+
+Az RRT előnye hogy kis résekben is hatékony és könnyű implementálni. Hátránya, hogy minden egyes pályatervezéshez új keresést kell indítanunk, egyes esetekben nagyon lassan talál megoldást.
