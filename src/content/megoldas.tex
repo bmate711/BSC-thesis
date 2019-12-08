@@ -1,5 +1,63 @@
 \chapter{Megoldás nov 26}
-\section{Munkafolyamat}
-\section{Inverz kinematika}
+Ebben a fejezetben szeretném bemutatni a feladat megoldására használt matematikai modelleket, amelyek alapján implementáltam az elkészült programot.
+
+A munkafolyamat során, munkadarabok felvételi és lerakási helyét leíró homogén transzformációs mátrixokból az inverz kinematikai számítás megadja a munkadarabok helyének robotkonfigurációit. Ezeket a konfigurációkat először szűrni kell. Ezt követően ezekből a konfigurációkból sorrendtervezés és konfigurációválasztás során egy munkadarabok felvételi és lerakási sorrendjének robotkonfigurációit tartalmazó lista készül. Ennek a listának az egymást követő párjai közt kell ütközésmenetes pályát terveznünk. Ez a pálya lesz a munkafolyamat kimenetele. 
+
+\section{Inverz kinematika és konfiguráció szűrés}
+Az általam használt UR5-ös robot inverz kinematikai számítása zárt alakban megoldható. Ehhez a számításhoz bementi paraméterként szükségesek a robotkar D-H paraméterei és megfogó helyét leíró homogén transzformációs mátrix. A zárt alakú megoldás nagy előnye, hogy az összes lehetséges megoldást visszaadja és gyorsan számítható. Esetünkben a számítás 32 megoldáságat talál. A megoldáságak eredményei nem mind lehetségesek, vannak köztük olyan megoldások, amelyeket a robotkar nem tud felvenni, mivel negatív gyököt tartalmaz vagy amelynek túl nagy a hibájuk az eredeti homogén transzformációs mátrixhoz képest. Negatív gyököt tartalmazó megoldáságak könnyen szűrhetőek. A hibás számítást pedig, úgy tudjuk ellenőrizni, hogy a megoldáságak robotkonfigurációiból direkt kinematika segítségével homogén transzformációs mátrixokat képzünk. Ezeket a mátrixokat hasonlítjuk össze a bemeneti paraméterként kapott mátrixszal és ha egy bizonyos értéknél jobban különbözik, akkor a mátrixhoz tartozó megoldáságat töröljük.
+
+A inverz kinematikai számítások kimeneteléből még ki kell szűrnünk az ütköző robotkonfigurációkat. Ezt a szűrést geometriai úton könnyen elvégezhetjük a cella és robotkar modellje alapján.
+
+A legtöbb esetben nem kell további szűréseket végrehajtanunk. Viszont a pályatervezés során problémába ütköztem, amire még egy szűrés bevezetése jelentett megoldást. A pályatervezésre használt PRM térkép gráfja több különálló komponensre szakadt. Ez a szakadás azt jelenti, hogy két különálló komponens egy-egy robotkonfigurációja közt nem található ütközésmentes pálya. Sajnos a sorrend tervezés végeredményében előfordult, hogy a robotkonfigurációk nem egy gráfkomponensbe estek, így nem lehetett köztük ütközésmentes pályát tervezni. Ennek kiküszöbölése véget, a robotkonfigurációkat még szűröm, hogy csak a legnagyobb, a cella 90 \% lefedő gráfkomponensbe tartozóak maradjanak.
+
 \section{Sorrendtervezés és konfiguráció választás}
-\section{Pályatervezés}
+A minden egyes munkadarabra végrehajtott inverze kinematika és konfiguráció szűrés eredményeként kapott robotkonfigurációk lesznek a sorrendtervezés és konfigurációválasztás egyik bemenete. Ezek a robotkonfigurációk munkadarabok le és felvételi helye szerint csoportosítottak. Másik bemeneti paraméter, a robotkar szögsebessége és szöggyorsulása.
+
+A probléma megoldásához egy irányított, élsúlyozott GTSP gráfot kell építenünk. A gráf csúcsai a munkadarabokhoz tartozó robotkonfigurációk és a robotkar kezdő- és végpozíciója. A GTSP gráf egy csoportja az egy munkadarab felvételi illetve lerakási robotkonfigurációi. NWp számú munkadarab esetén NWp*2 csoportunk lesz, minden munkadarabhoz egy felvételi és lerakási csoport.
+
+A feladat alapján a helyes sorrendre szabhatunk meg kritériumokat. Ezek a kritériumok a következőek:
+\begin{itemize}
+\item A robotkar a kezdő pozíciójából, egy munkadarab tetszőleges felvételi robotkonfigurációjába mozoghat.
+\item A robot egy munkadarab felvételi robotkonfigurációjából a munkadarab bármelyik lerakási robotkonfigurációjába mehet.
+\item A kar egy munkadarab lerakási robotkonfigurációjából, ha van még másik munkadarab, akkor bármely másik munkadarab tetszőleges felvételi robotkonfigurációjába mozoghat.
+\item A kar egy munkadarab lerakási robotkonfigurációjából, ha már nincs másik munkadarab, akkor robotkar végpozíciójába mozoghat. 
+\end{itemize}
+
+A GTSP gráf két csomópontja közt a kritériumoknak megfelelően kell behúzni az éleket. Ez azt jelenti, hogy a robotkar kezdőkonfigurációjából a munkadarabok összes felvételi konfigurációjába kell húzni egy irányított, súlyozott élt. Egy munkadarab felvételi robotkonfigurációjából, a munkadarab összes lerakási robotkonfigurációjába kell húznunk irányított súlyozott élt. Egy munkadarab lerakási robotkonfigurációjából pedig a többi munkadarab összes felvételi robotkonfigurációjába és a robotkar végpozíciójába kell irányított, súlyozott élt húznunk. A gráf egyszerűsített ábrája:
+
+[Gráf ábra]
+
+
+Két megfogási pont közötti súly, a robotkar két állapota közötti mozgási időnek felel meg. Ez a mozgási idő annak a csuklónak a mozgási ideje amely a legtovább tart, mert a kar csuklói egyszerre mozognak. Az egyes csuklók mozgási ideje a csukló maximális szögsebességéből és maximális szöggyorsulásából számítható. A számítás két csoportra bontható. Az egyik csoportba tartoznak azok a csuklóforgások, aminél a csukló eléri a maximális forgási sebességet és azzal forog egy ideig. Ekkor a mozgást egy V-t diagramon ábrázolva egy trapézt kapunk. 
+
+[Ábra]
+
+A trapéz annál szélesebb lesz minél tovább tart a maximális forgási sebességgel történő mozgás. A mozgás útját a diagram alatti terület fogja megadni. Mivel ismert a maximális sebesség, gyorsulás és az út, azaz az egyes csuklóállások közötti szögkülönbség, így az idő a következőféleképpen számolható: 
+
+[számítás]
+%t=2V/a+(s-V\^2/a)/a
+
+A másik csoportba azok a csuklóforgások tartoznak amikor a csukló nem éri el a maximális forgási sebességet, vagy éppen egy pillanatra éri el. Ekkor a mozgást V-t diagramon ábrázolva egy háromszöget kapunk. 
+
+[Ábra]
+
+Ebben az esetben is a megtett út a test alatti területnek felel meg, amit hasonlóan tudunk számítani, mint a trapéz esetében. Az idő ekkor a következőféleképpen  számítható:
+
+%t=√(4s/a)
+[számítás]
+
+\section{Ütközésmentes pályatervezés}
+
+
+A ütközésmentes pályatervezés során két robotkonfiguráció közt keresünk egy olyan pályát, amelyet a robotkar képes bejárni úgy, hogy nem ütközik önmagába vagy a cellába. A pályatervezés bemenetele egy szabályos munkadarab felvételi sorrendet tartalmazó lista. A tervezés során a lista egymást követő párjai közt kell ütközésmentes pályát találnunk.
+
+A tervezéshez, a sok dimenzió miatt, két pályatervező algoritmus merült fel az RRT és a PRM. A PRM előnye az RRT-vel szemben, hogy a PRM egy pályatérképet készít, amit több keresésre is fel, lehet használni, így a térkép elkészítése után sokkal gyorsabb mint az RRT. Mivel a feladat során a cella nem változik, így elég egyszer felépíteni a térképet, utána tetszőleges számú keresést tudunk végrehajtani. Ezek miatt a feladat megoldásához a PRM algoritmust választottam.
+
+A PRM algoritmust alapjait az Irodalmi áttekintés című fejezetben már bemutattam. A pályatérkép építéshez egy ütközésdetektáló algoritmus használunk. A pályatérkép építése során, előre megadott NV számú csúcsot helyezünk el,  véletlenszerűen mintavételezve a teret. Egy csomópontot mindig az N darab legközelebbi szomszédjával próbáljuk meg összekötni. Az NV számú csomópont lerakása után, azokhoz a csomópontokhoz, amelyeknek alacsony a fokszáma új szomszédokat próbálunk meg felvenni. Ehhez a PRM algoritmussal részletesebben mintavételezzük a csomópont körüli teret. Ennek az eljárásnak a segítségével egy összetett gráfot építünk. Előfordulhat, hogy a gráf nem összefüggő, hanem több komponensből áll. Ez azt jelenti, hogy ez egyik komponens csomópontjaiból a másik komponens csomópontjaiba nincs ütközésmentes pálya. Az elkészült pályatérképből töröljük azokat a komponenseket amelyeknek elemszáma elhanyagolhatóan alacsony, hogy ne zavarjál meg a pályatervezést.
+
+Pályatervezés során, egy kezdő és végpont között szeretnénk ütközésmentes pályát találni. Ehhez felvesszük a kezdő és végpontot a pályatérképbe. Ezek után ellenőrizzük, hogy egy komponensbe kerültek-e. Ha nem, akkor a pályatérképben nem létezik ütközésmenet út közöttük. Ha egy komponensbe kerültek akkor megállapítjuk köztük a komponenesen belüli legrövidebb utat. Ez az út lesz a pályatervezés eredménye.
+
+A pályatervezés eredményét célszerű algoritmusok segítségével optimalizálni. Ezt simító algoritmussokkal tehetjük meg. Az algoritmusok szükség esetén új csomópontokat vesznek fel vagy levágják az út kerülő csomópontjait.
+
+A feladat megoldásához két PRM térképre van szükségünk, egyiket a megfogó nyílt állásához, a másik a megfogó zárt állásához. A zárt állású megfogó PRM térképét a megfogó általános mozgásakor használjuk. A megfogó nyílt állású PRM-jét pedig amikor munkadarabot szállít a kar.
+

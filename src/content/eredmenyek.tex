@@ -1,2 +1,202 @@
 \chapter{Eredmények dec 3}
-Eredmények
+
+Ebben a fejezeteben az általam elkészített sorrendtervezés és konfigurációválasztás és munkafolyamat futási eredményeit vizsgálom. Mindkét esetben előre legenerált tesztfaladatokat oldok meg, amelyeket fájlból olvasok be. A teszteléshez a használt feladatok a RoboDK segítségével generáltam.
+
+\section{Sorrendtervezés és konfigurációválasztás}
+
+A tesztelésre használt bemeneti fájl tartalmazza a robotkar kezdő és végállapotát, a munkadarabok közös végállapotának robotkonfigurációit és az egyes munkadarabok felvételi robotkonfigurációit.  
+
+A tesztfeladatok méretét két paraméter segítségével lehet változtatni, a munkadarabok számával és a munkadarabokhoz tartozó konfigurációk számával. 
+
+Minden tesztfeladat, a cella tálcáján véletlenszerűen elhelyezett munkadarabok kiindulási és célhelyzetének robotkonfigurációit tartalmazzák. 
+
+
+A következő típusú tesztfeladatokat futtattam:
+
+\begin{itemize}
+\item 3-5 munkadarab, munkadarabonként 5 felvételi és lerakási konfiguráció, munkadarabok száma 1-el nő feladattípusonként.
+
+\item 5 - 30 munkadarab, munkadarabonként 10 felvételi és lerakási konfiguráció, munkadarabok száma 5-el nő feladattípusonként.
+\end{itemize} 
+
+
+Minden egyes tesztfeladat típushoz 10 feladatpéldányt készítettem.
+
+A megoldóm eredményeit az XPress általános megoldó eredményeivel vetettem össze. Mind a két megoldó ugyan azokat a feladat példányokat futtatta. A futási eredményeket a következő tábláz tartalmazza.
+
+Az általános megoldó előnye, hogy elegendő futásidő mellet megtalálja az optimális megoldást. Hátránya, hogy a feladat növekedésével megsokszorozódik a futási ideje. Esetünkben 5 munkadarabra és munkadarabonként 10 robotkonfigurációra átlagosan 47 perc. Általános megoldók a közel valós idejű feladatmegoldásra alkalmatlanak. A összehasonlítás célja az OR-Tools hatásfokának mérése volt az optimumhoz képest.
+
+Az XPress megoldót csak az első négy típusú tesztfeladatra futtattam. A következő táblázatban a 40 darab tesztfeladat feladattípusonként átlagolva látható.
+
+\begin{center}
+ \begin{tabular}{ |c|c|c| } 
+\hline
+XPress & OR-Tools Hegymászó keresés & OR-Tools Tabu keresés 20 ms \\
+\hline
+
+ 9,734 s & 9,741 s & 9,741 s\\ 
+ 12,325 s & 12,335 s & 12,335 s\\ 
+ 15,594 s & 15,669 s & 15,669 s\\ 
+ 15,1753 s & 15,41 s & 15,371 s\\
+\hline
+\end{tabular}
+\end{center}
+
+Jól látható, hogy az OR-Tools megoldásai kissé elmaradnak az optimálistól, de ez az eltérés elhanyagolható.
+
+\begin{center}
+ \begin{tabular}{ |c|c|c| } 
+\hline
+
+ & OR-Tools Hegymászó& OR-Tools Tabu 20ms\\ 
+\hline
+ XPress & 0,96\% & 0,678\%\\ 
+ 
+\hline
+\end{tabular}
+\end{center}
+
+Látható, hogy a megoldások százalékos eltérésének átlaga az XPress-hez képest a hegymászó algoritmus esetén nem haladja meg az 1\%-ot. A tabu keresés még ennél is jobban teljesít, a nagyobb feladatoknál ki tud törni a lokális minimumból, ezáltal jobb eredményt elérve, mint a hegymászó algoritmus.
+
+
+\begin{center}
+ \begin{tabular}{ |c|c|c| } 
+\hline
+XPress & OR-Tools Hegymászó keresés & OR-Tools Tabu keresés 20 ms \\
+\hline
+
+2013,2 ms & 6,1 ms & 23,1 ms\\ 
+ 56100,8 ms & 8,8 ms & 23,3 ms\\ 
+ 1111642,4 ms & 8,6 ms & 24,7 ms\\ 
+ 2825704,6 ms & 12 ms & 24,9 ms\\
+\hline
+\end{tabular}
+\end{center}
+
+Az algoritmus futási idejét tekintve, mint ahogy előre vártuk, az OR-Tools sokkal gyorsabban találja meg a megoldásokat, mint az XPress megoldó. Ha az OR-Tools két különböző algoritmusát nézzük akkor azt tapasztaljuk, hogy a hegymászó keresés sokkal gyorsabban megtalálja azt a megoldást amin már nem tud javítani, mint a tabu keresésnél beállított időkorlát.
+
+
+Azonban ha a megoldás idejének és az algoritmus futási idejének összegét vizsgáljuk akkor már összetettebb a kép.
+
+
+\begin{center}
+ \begin{tabular}{ |c|c|c|c| } 
+\hline
+Hegymászó  & Tabu  20 ms & Tabu  60 ms & Tabu  100 ms\\
+\hline
+9772,4	ms & 9789,4 ms & 	9829,4 ms &	9869,7\\
+12871,6 ms &	12781,5 ms &	12822,3 ms &	12861,9\\
+15677,4 ms &	15693,5 ms &	15733,8 ms &	15772,0\\
+15422,2 ms &	15395,9 ms &	15439,6 ms &	15474,3\\
+31288,0 ms &	31293,5 ms &	31275,9 ms &	31305,6\\
+45997,2 ms &	46444,9 ms &	45985,3 ms &	45992,9\\
+61761,4 ms &	61952,3 ms &	61760,2 ms &	61807,0\\
+76402,0 ms &	76953,4 ms &	76418,0 ms &	76390,2\\
+
+\hline
+\end{tabular}
+\end{center}
+
+
+\begin{center}
+ \begin{tabular}{ |c|c|c|c| } 
+\hline
+& Tabu  20 ms & Tabu  60 ms & Tabu  100 ms\\
+\hline
+Hegymászó  &0,175\% &	0,586\% &	1,001\% \\
+&-0,611\% &	-0,293\% &	0,018\% \\
+&0,104\% &	0,363\% &	0,608\% \\
+&-0,162\% &	0,123\% &	0,349\% \\
+&0,018\% &	-0,032\% &	0,064\% \\
+&0,959\% &	-0,025\% &	-0,009\%\\
+&0,305\% &	-0,002\% &	0,074\% \\
+&0,717\% &	0,021\% &	-0,015\% \\
+
+\hline
+\end{tabular}
+\end{center}
+
+A hegymászó algoritmus a futási idejével kompenzálja azt, hogy néha lokális minimumban ragad. A tabu kereséseknél látszik, hogy voltak olyan feladattípusok, amikor jobban teljesítettek mint a hegymászó keresés. Ezért, ha tabu keresésnél sikerül megtalálni az optimális futásidő kritériumot a feladat méretéhez jobb eredményt érhetünk el, mint a hegymászó algoritmus segítségével. A hegymászó algoritmus akkor jó választás, ha nem tudjuk előre a feladat méretét, változik a feladat mérete. Ezzel szemben a tabu keresést akkor érdemes választani, ha előre tudjuk a feladatméretet, így tudjuk optimalizálni a keresés időkritériumát.
+
+
+\section{Munkafolyamat}
+
+A munkafolyamat tesztelésekor a feladatméretet a munkadarabok számval lehet befolyásolni. A tesztelés során 5-40 munkadarabra néztem a program futási idejét. Faladattípusonként 5-el növeltem a munkadarabok számát és egy faladat típusra 10 tesztfeladatot generáltam.
+
+A bementi állomány tartalmazza a robotkar kezdő és végállapotát és a munkadarabok felvételi és lerakási helyének homogén transzformációs mátrixát.
+
+A munkafolyamat vizsgálata során először a teljes munkafolyamat futási idejét és az egyes részfolyamatok futási idejét vizsgáltam.
+
+\begin{center}
+ \begin{tabular}{ |c|c|c|c||c| } 
+ \hline
+Inverz & Sorrendtervezés & Pályatervezés & Munkafolyamat & Pályatervezés \\
+kinematika & & & &első megoldás \\
+és szűrés & & & & \\
+\hline
+
+464,1 &	9,5	&8957,0	& 9430,6 &	1544,6\\
+910,4 &	9,5	&21392,8	& 22312,7&	2375,5\\
+1221,1	& 16,4	&31335,1	& 32572,6&	2562,5\\
+1652,0 &	26,6&	41525,1&	43203,7&	2860,9\\
+2125,9 &	40,4&	53373,6&	55539,9&	3480,2\\
+2556,3 &	49,8&	63897,9&	66504,0&	4122,1\\
+3008,3 &	65,9&	71874,3&	74948,5&	4307,4\\
+3581,8 &	91,8&	84072,9	&87746,4&	5102,7\\
+
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+ \begin{tabular}{ |c|c||c| } 
+ \hline
+Pályatervezés első  & Első megoldás pályájának & Munkafolyamat ideje \\
+megoldás számításideje (ms) & bejárási ideje (s)& az első pálya tervezésig\\
+\hline
+
+1071,0	& 2,02 &	1544,6\\
+1455,6 & 2,24 & 2375,5\\
+1325,0 & 2,12 & 2562,5\\
+1182,3 & 2,05 & 2860,9\\
+1313,9 & 2,04 & 3480,2\\
+1516,0 & 2,17 & 4122,1\\
+1233,2 & 2,05 & 4307,4\\
+1429,1 & 2,08 & 5102,7\\
+
+\hline
+\end{tabular}
+\end{center}
+
+A táblázatokból látszik, hogy bár a pályatervezés tart a legtöbb ideig a robotkar folyamatos mozgásához elegendő csak az első pályaszakaszt kiszámítanunk. Ez azért lehetséges mert egy pályaszak átlagos számítás ideje kisebb mint a pályaszakasz átlagos bejárási ideje. 
+
+A munkafolyamat idejét az első pályatervezésig csak az inverz kinematika és robotkonfiguráció szűrés befolyásolja érdemileg. 
+
+Ebben a munkafolyamatban három lépés történik, az inverz kinematika, a robotkonfigurációk ütközésének kiszűrése és PRM pályatérkép több komponensre szakadása miatt szükséges, egy komponensbe tartozás vizsgálata. A három közül az egy komponensbe tartozás szűrése okozza a számítási idő növekedését. Erre megoldást jelenthet a PRM pályatérkép más paraméterekkel történő generálása, az algoritmus továbbfejlesztése.
+
+
+Vizsgáltam még a sorrendtervezés és pályatervezés pályájának bejárási idejét és szögelfordulását.
+\begin{center}
+ \begin{tabular}{ |c|c|c|c| } 
+ \hline
+Sorrend  & Sorrend & Pálya & Pálya \\
+bejárási ideje & szögelfordulása&bejárási ideje & szögelfordulása\\
+\hline
+
+18,3 s&	2154,3$^{\circ}$ &	22,5 s&	2285,2$^{\circ}$ \\
+35,5 s&	4144,6$^{\circ}$ &	44,7 s&	4477,8$^{\circ}$ \\
+55,9 s& 6581,8$^{\circ}$ &	70,4 s&	7049,7$^{\circ}$ \\
+75,9 s&	8868,1$^{\circ}$ &	95,9 s&	9520,9$^{\circ}$ \\
+92,1 s&	10797,3$^{\circ}$ &	117,8 s&	11636,4$^{\circ}$ \\
+111,1 s&	13145,0$^{\circ}$ &	141,1 s&	14087,5$^{\circ}$ \\
+125,8 s&	14767,0$^{\circ}$  &	159,3 s&	15886,8$^{\circ}$ \\
+145,9 s&	17161,5$^{\circ}$ &	186,0 s&	18461,9$^{\circ}$ \\
+
+\hline
+\end{tabular}
+\end{center}
+
+A táblázatból kiolvasható, hogy a pálya bejárási ideje egyenesen arányos szögelfordulással és a sorrendtervezés szögelfordulása és pálya bejárási ideje is egyenesen arányos a pályatervezés szögelfordulásával és pálya bejárási idejével.
+
+
+

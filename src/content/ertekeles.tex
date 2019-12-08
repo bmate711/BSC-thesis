@@ -1,2 +1,16 @@
-\chapter{Értékelés dec 3}
-Értékelés
+\chapter{Értékelés}
+
+Az elkészített program jó megoldásokat ad a pakolási feladatra, de a futási ideje nem mindig felel meg az elvártnak. A következőkben értékelem az egyes részfolyamatok teljesítményét.
+
+Az inverz kinematika a direkt megoldásnak köszönhetően nagyon jó hatásfokkal fut és ütközésmentes pályatervezés is kellően gyors a közel valós idejű feladat megoldásához. Az egy komponensbe tartozás szűrése azonban lelassítja a részfolyamatot. Azonban ez a szűrés elkerülhető a PRM térkép építő algoritmus jobb paraméterezésével, fejlesztésével, munkacella áttervezésével.  
+
+
+Az elkészült sorrendtervezési könyvtár megfelel az elvárt kritériumoknak. A munkafolyamat futási ideje és a megoldás minősége elegendő a pakolási probléma közel valós idejű megoldásához. 
+
+A Sorrendtervezési könyvtár még nem kínál megoldást több a feladathoz kapcsolódó problémára. Talán a legfontosabb ilyen probléma, hogy nem lehet a sorrendi kényszerek megadni a tervezés során. Ez arra jelentene megoldást, mikor kettő vagy több munkadarab akadályozza egymást, ezért a robotkar nem fér hozzá az akadályozott munkadarabokhoz. Ebben az esetben a kar az akadályozott munkadarabokat csak az akadály eltűnése után tudja felvenni. Erre megoldást jelentene, ha bemenetként a program a sorrendi kényszereket is megkapná és ez alapján tervezné meg a munkadarabok bejárásának sorrendjét.
+
+A pályatervezési algoritmus futási sebessége elegendő a feladat megoldásához. Egy pálya tervezése átlagosan közel egy másodpercig tart és a pálya átlagos bejárási ideje ennél magasabb. Ennek köszönhetően az első pálya tervezése után a robotkar folyamatosan tud mozogni. Ahogy már fentebb is írtam, a pályatérkép több komponensre szakadása komoly problémákat okoz. A feladat megoldása során szerencsénk volt, mivel az egyik komponens tartalmazta a csomópontok 90\%-át. Így a robotkonfigurációk egy komponensbe tartozásának vizsgálatával jó megoldásokat tudtunk adni a problémára. Azonban ez az eljárás nagyban befolyásolja a program futását.
+
+A jövőben meg kell vizsgálni, hogy mi okozza a pályatérkép több komponensre szakadását és ha nem a cella tulajdonságaiból adódik, akkor javítani kell a PRM pályatérkép építő algoritmus paraméterezésén, szükség esetén magán az algoritmuson. Ezenfelül tovább lehet fejleszteni az algoritmust az új kutatási irányzatoknak megfelelően, például a mintavételezés növelésével a cella szűk részein.
+
+A programban még számos fejlesztési potenciál rejlik. A szakdolgozatom során elkészült program jó alapot jelent a további fejlesztésekhez. Jövőbeli célom a sorrendi kényszerek implementálása, a PRM térkép több komponensre szakadásának feltérképezése és a program által tervezett megoldás tesztelése éles körülmények között.
